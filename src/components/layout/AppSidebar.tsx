@@ -42,13 +42,17 @@ const operate = [
 const intelligence = [
   { title: "AI Insights", url: "/ai", icon: Sparkles },
   { title: "AI Evaluation", url: "/ai-eval", icon: FlaskConical },
+  { title: "AI Governance", url: "/ai-governance", icon: Shield },
   { title: "Reports", url: "/reports", icon: BarChart3 },
 ];
 
 const admin = [
   { title: "Audit log", url: "/audit", icon: ScrollText },
   { title: "Users & roles", url: "/users", icon: UserCog },
+  { title: "Roles & permissions", url: "/rbac", icon: ShieldCheck },
   { title: "Feature flags", url: "/feature-flags", icon: Flag },
+  { title: "Observability", url: "/observability", icon: Activity },
+  { title: "System health", url: "/health", icon: HeartPulse },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
