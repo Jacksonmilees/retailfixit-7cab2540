@@ -9,11 +9,8 @@ export const Route = createFileRoute("/_app")({
 function AppLayout() {
   const { user, loading } = useAuth();
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-bg-secondary">
-        <div className="text-sm text-muted-foreground">Loading…</div>
-      </div>
-    );
+    const { FullPageLoader } = require("@/components/common/FluentSpinner");
+    return <FullPageLoader />;
   }
   if (!user) return <Navigate to="/login" />;
   return <AppShell />;
