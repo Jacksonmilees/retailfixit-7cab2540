@@ -109,6 +109,36 @@ function ReportsPage() {
           </ResponsiveContainer>
         </CardContent>
       </Card>
+
+      <Card className="border-border/60 shadow-card rounded-2xl">
+        <CardHeader>
+          <CardTitle className="text-[15px] flex items-center gap-2"><Wrench className="h-4 w-4 text-primary" />Per-service PDF reports</CardTitle>
+          <CardDescription className="text-[12px]">One-click download for each service line</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {services.map((svc) => {
+              const count = items.filter(j => j.category === svc).length;
+              return (
+                <button
+                  key={svc}
+                  onClick={() => { generateServiceReport(svc, items.filter(j => j.category === svc)); toast.success(`${svc} report downloaded`); }}
+                  className="group flex items-center justify-between gap-3 rounded-xl border border-border/60 p-3 hover:border-primary/40 hover:shadow-card transition-all text-left"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="h-9 w-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center"><Wrench className="h-4 w-4" /></div>
+                    <div className="min-w-0">
+                      <div className="text-[13px] font-medium truncate">{svc}</div>
+                      <div className="text-[11px] text-muted-foreground">{count} job{count === 1 ? "" : "s"}</div>
+                    </div>
+                  </div>
+                  <FileDown className="h-3.5 w-3.5 text-muted-foreground group-hover:text-primary transition-colors" />
+                </button>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
