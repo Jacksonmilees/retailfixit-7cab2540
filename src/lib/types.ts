@@ -110,6 +110,10 @@ export interface AuditLog {
   entityType: "job" | "vendor" | "assignment" | "user" | "ai" | "tenant";
   entityId: string;
   metadata?: Record<string, unknown>;
+  before?: Record<string, unknown> | null;
+  after?: Record<string, unknown> | null;
+  correlationId?: string;
+  traceId?: string;
   createdAt: string;
 }
 
