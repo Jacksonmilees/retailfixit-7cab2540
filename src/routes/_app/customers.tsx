@@ -6,9 +6,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Building2, MapPin } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Search, Building2, MapPin, FileDown } from "lucide-react";
+import { TableSkeleton } from "@/components/common/Skeletons";
 import { EmptyState } from "@/components/common/PageHeader";
+import { generateCustomerReport } from "@/lib/reports/pdf";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/customers")({
   component: CustomersPage,
@@ -47,7 +50,7 @@ function CustomersPage() {
 
       <Card className="border-border/60 shadow-card rounded-2xl">
         <CardContent className="p-0">
-          {jobs.isLoading ? <Skeleton className="h-64 m-4" /> : filtered.length === 0 ? (
+          {jobs.isLoading ? <div className="p-4"><TableSkeleton rows={8} cols={5} /></div> : filtered.length === 0 ? (
             <EmptyState icon={Building2} title="No customers yet" description="Customer accounts appear automatically as jobs are created." />
           ) : (
             <Table>
@@ -57,6 +60,7 @@ function CustomersPage() {
                   <TableHead>Locations</TableHead>
                   <TableHead className="text-right">Jobs</TableHead>
                   <TableHead className="text-right">Last activity</TableHead>
+                  <TableHead className="text-right w-[100px]">Report</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -82,6 +86,13 @@ function CustomersPage() {
                     <TableCell className="text-right tabular-nums font-medium">{c.jobs}</TableCell>
                     <TableCell className="text-right text-[11px] text-muted-foreground">
                       {c.lastJob ? new Date(c.lastJob).toLocaleDateString() : "—"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button size="sm" variant="ghost" className="h-7 px-2 rounded-md" onClick={() => {
+                        const cjobs = (jobs.data?.items ?? []).filter(j => j.customerName === c.name);
+                        generateCustomerReport(c.name, cjobs);
+                        toast.success(`Report for ${c.name} downloaded`);
+                      }}><FileDown className="h-3.5 w-3.5" /></Button>
                     </TableCell>
                   </TableRow>
                 ))}

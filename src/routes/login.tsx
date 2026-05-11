@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
 import { ArrowRight, Sparkles, ShieldCheck, Zap } from "lucide-react";
+import { FluentSpinner } from "@/components/common/FluentSpinner";
 
 export const Route = createFileRoute("/login")({
   validateSearch: (s: Record<string, unknown>) => ({ redirect: (s.redirect as string) || "/dashboard" }),
@@ -113,7 +114,7 @@ function LoginPage() {
                 <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="h-11 text-[14px] rounded-lg" />
               </div>
               <Button type="submit" className="w-full h-11 rounded-lg text-[14px] font-medium bg-brand shadow-pop hover:shadow-glow transition-all" disabled={busy}>
-                {busy ? "Signing in…" : (<>Continue <ArrowRight className="ml-1.5 h-4 w-4" /></>)}
+                {busy ? (<><FluentSpinner size={16} className="mr-2 text-primary-foreground" />Signing in</>) : (<>Continue <ArrowRight className="ml-1.5 h-4 w-4" /></>)}
               </Button>
             </form>
 

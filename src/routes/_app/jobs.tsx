@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { StatusBadge, PriorityBadge, TimeAgo, RiskBadge } from "@/components/common/badges";
-import { Skeleton } from "@/components/ui/skeleton";
+import { TableSkeleton } from "@/components/common/Skeletons";
+import { FluentSpinner } from "@/components/common/FluentSpinner";
 import { Search, Plus, RefreshCcw } from "lucide-react";
 import type { JobStatus, JobPriority } from "@/lib/types";
 import { useRealtime } from "@/hooks/use-realtime";
@@ -85,6 +86,9 @@ function JobsList() {
         </CardContent>
       </Card>
 
+      {jobs.isLoading ? (
+        <TableSkeleton rows={10} cols={8} />
+      ) : (
       <Card>
         <CardContent className="p-0">
           <Table>
@@ -101,11 +105,6 @@ function JobsList() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {jobs.isLoading && Array.from({ length: 8 }).map((_, i) => (
-                <TableRow key={i}>
-                  <TableCell colSpan={8}><Skeleton className="h-6" /></TableCell>
-                </TableRow>
-              ))}
               {jobs.data?.items.map((j) => (
                 <TableRow key={j.id} className="cursor-pointer">
                   <TableCell className="font-medium">
@@ -129,6 +128,7 @@ function JobsList() {
           </Table>
         </CardContent>
       </Card>
+      )}
 
       {jobs.data && (
         <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -191,7 +191,7 @@ function NewJobDialog() {
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={() => m.mutate()} disabled={m.isPending || !form.title}>{m.isPending ? "Creating…" : "Create job"}</Button>
+          <Button onClick={() => m.mutate()} disabled={m.isPending || !form.title}>{m.isPending ? <><FluentSpinner size={14} className="mr-2 text-primary-foreground" />Creating</> : "Create job"}</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

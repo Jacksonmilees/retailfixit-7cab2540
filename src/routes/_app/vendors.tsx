@@ -1,13 +1,16 @@
 import * as React from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, Star } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
+import { Search, Star, FileDown } from "lucide-react";
+import { TableSkeleton } from "@/components/common/Skeletons";
+import { generateVendorReport } from "@/lib/reports/pdf";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/vendors")({
   component: VendorsList,
@@ -32,6 +35,7 @@ function VendorsList() {
         </CardContent>
       </Card>
 
+      {vendors.isLoading ? <TableSkeleton rows={8} cols={7} /> : (
       <Card>
         <CardContent className="p-0">
           <Table>
@@ -44,14 +48,14 @@ function VendorsList() {
                 <TableHead className="text-right">Load</TableHead>
                 <TableHead className="text-right">Avg response</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead className="text-right w-[80px]">Report</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {vendors.isLoading && <TableRow><TableCell colSpan={7}><Skeleton className="h-24" /></TableCell></TableRow>}
               {vendors.data?.items.map((v) => (
                 <TableRow key={v.id}>
                   <TableCell>
-                    <div className="font-medium text-foreground">{v.name}</div>
+                    <Link to="/vendors/$vendorId" params={{ vendorId: v.id }} className="font-medium text-foreground hover:text-primary transition-colors">{v.name}</Link>
                     <div className="text-xs text-muted-foreground">{v.email}</div>
                   </TableCell>
                   <TableCell><div className="flex flex-wrap gap-1">{v.categories.map((c) => <Badge key={c} variant="secondary" className="text-[10px]">{c}</Badge>)}</div></TableCell>
@@ -62,12 +66,21 @@ function VendorsList() {
                   <TableCell>
                     <Badge variant="outline" className={v.status === "active" ? "border-success/40 text-success" : v.status === "paused" ? "border-warning/40 text-foreground" : "border-destructive/40 text-destructive"}>{v.status}</Badge>
                   </TableCell>
+                  <TableCell className="text-right">
+                    <Button size="sm" variant="ghost" className="h-7 px-2 rounded-md" onClick={async () => {
+                      const a = await api.listAssignments({ vendorId: v.id, pageSize: 50 });
+                      const j = await api.listJobs({ pageSize: 200 });
+                      generateVendorReport(v, { assignments: a.items, jobs: j.items });
+                      toast.success(`Vendor report downloaded`);
+                    }}><FileDown className="h-3.5 w-3.5" /></Button>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
+      )}
 
       {vendors.data && (
         <div className="flex items-center justify-between text-sm text-muted-foreground">

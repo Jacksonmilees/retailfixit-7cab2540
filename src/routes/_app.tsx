@@ -1,6 +1,7 @@
 import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useAuth } from "@/lib/auth/context";
 import { AppShell } from "@/components/layout/AppShell";
+import { FullPageLoader } from "@/components/common/FluentSpinner";
 
 export const Route = createFileRoute("/_app")({
   component: AppLayout,
@@ -8,13 +9,7 @@ export const Route = createFileRoute("/_app")({
 
 function AppLayout() {
   const { user, loading } = useAuth();
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-bg-secondary">
-        <div className="text-sm text-muted-foreground">Loading…</div>
-      </div>
-    );
-  }
+  if (loading) return <FullPageLoader />;
   if (!user) return <Navigate to="/login" />;
   return <AppShell />;
 }

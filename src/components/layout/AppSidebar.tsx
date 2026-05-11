@@ -9,7 +9,6 @@ import {
   Building2,
   UserCog,
   Users,
-  Bell,
   BarChart3,
   Flag,
   FlaskConical,
@@ -35,7 +34,6 @@ const operate = [
   { title: "Vendors", url: "/vendors", icon: Building2 },
   { title: "Customers", url: "/customers", icon: Users },
   { title: "Assignments", url: "/assignments", icon: ShieldCheck },
-  { title: "Notifications", url: "/notifications", icon: Bell },
 ];
 
 const intelligence = [
