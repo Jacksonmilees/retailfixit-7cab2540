@@ -1,5 +1,5 @@
 import * as React from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, Star, FileDown } from "lucide-react";
+import { VendorDetailSheet } from "@/components/common/DetailSheets";
 import { TableSkeleton } from "@/components/common/Skeletons";
 import { generateVendorReport } from "@/lib/reports/pdf";
 import { toast } from "sonner";
@@ -19,10 +20,14 @@ export const Route = createFileRoute("/_app/vendors")({
 function VendorsList() {
   const [search, setSearch] = React.useState("");
   const [page, setPage] = React.useState(1);
+  const [selectedVendorId, setSelectedVendorId] = React.useState<string | null>(null);
   const vendors = useQuery({
     queryKey: ["vendors", { search, page }],
     queryFn: () => api.listVendors({ search, page, pageSize: 20 }),
   });
+  const assignments = useQuery({ queryKey: ["assignments"], queryFn: () => api.listAssignments({ pageSize: 200 }) });
+  const jobs = useQuery({ queryKey: ["jobs-all"], queryFn: () => api.listJobs({ pageSize: 500 }) });
+  const selectedVendor = selectedVendorId ? vendors.data?.items.find((v) => v.id === selectedVendorId) ?? null : null;
 
   return (
     <div className="space-y-4">
@@ -53,9 +58,9 @@ function VendorsList() {
             </TableHeader>
             <TableBody>
               {vendors.data?.items.map((v) => (
-                <TableRow key={v.id}>
+                <TableRow key={v.id} className="cursor-pointer" onClick={() => setSelectedVendorId(v.id)}>
                   <TableCell>
-                    <Link to="/vendors/$vendorId" params={{ vendorId: v.id }} className="font-medium text-foreground hover:text-primary transition-colors">{v.name}</Link>
+                    <button type="button" className="font-medium text-foreground transition-colors hover:text-primary" onClick={(e) => { e.stopPropagation(); setSelectedVendorId(v.id); }}>{v.name}</button>
                     <div className="text-xs text-muted-foreground">{v.email}</div>
                   </TableCell>
                   <TableCell><div className="flex flex-wrap gap-1">{v.categories.map((c) => <Badge key={c} variant="secondary" className="text-[10px]">{c}</Badge>)}</div></TableCell>
@@ -67,7 +72,8 @@ function VendorsList() {
                     <Badge variant="outline" className={v.status === "active" ? "border-success/40 text-success" : v.status === "paused" ? "border-warning/40 text-foreground" : "border-destructive/40 text-destructive"}>{v.status}</Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button size="sm" variant="ghost" className="h-7 px-2 rounded-md" onClick={async () => {
+                    <Button size="sm" variant="ghost" className="h-7 px-2 rounded-md" onClick={async (e) => {
+                      e.stopPropagation();
                       const a = await api.listAssignments({ vendorId: v.id, pageSize: 50 });
                       const j = await api.listJobs({ pageSize: 200 });
                       generateVendorReport(v, { assignments: a.items, jobs: j.items });
@@ -81,6 +87,14 @@ function VendorsList() {
         </CardContent>
       </Card>
       )}
+
+      <VendorDetailSheet
+        vendor={selectedVendor}
+        assignments={assignments.data?.items ?? []}
+        jobs={jobs.data?.items ?? []}
+        open={Boolean(selectedVendor)}
+        onOpenChange={(open) => !open && setSelectedVendorId(null)}
+      />
 
       {vendors.data && (
         <div className="flex items-center justify-between text-sm text-muted-foreground">
