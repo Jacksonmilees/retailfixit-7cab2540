@@ -46,13 +46,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useRealtime } from "@/hooks/use-realtime";
-import type { Vendor, AIRecommendation, Assignment } from "@/lib/types";
+import type { Vendor, AIRecommendation, Assignment, Job } from "@/lib/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { FluentSpinner, InlineLoader } from "@/components/common/FluentSpinner";
 import { DetailSkeleton } from "@/components/common/Skeletons";
 import { generateJobReport } from "@/lib/reports/pdf";
+import { CustomerDetailSheet, VendorDetailSheet, type CustomerProfile } from "@/components/common/DetailSheets";
 
 export const Route = createFileRoute("/_app/jobs/$jobId")({
   component: JobDetail,
@@ -61,6 +62,8 @@ export const Route = createFileRoute("/_app/jobs/$jobId")({
 function JobDetail() {
   const { jobId } = Route.useParams();
   const qc = useQueryClient();
+  const [vendorSheetOpen, setVendorSheetOpen] = React.useState(false);
+  const [customerSheetOpen, setCustomerSheetOpen] = React.useState(false);
   const job = useQuery({ queryKey: ["job", jobId], queryFn: () => api.getJob(jobId) });
   const rec = useQuery({ queryKey: ["rec", jobId], queryFn: () => api.getRecommendation(jobId) });
   const vendors = useQuery({
@@ -97,6 +100,7 @@ function JobDetail() {
     ? assignmentActor(currentAssignment, users.data ?? [])
     : "Not assigned";
   const jobAudit = audit.data?.items.filter((a) => a.entityId === jobId) ?? [];
+  const customerProfile = buildSingleCustomerProfile(j);
 
   function exportPdf() {
     generateJobReport(j, { vendor: assigned, audit: audit.data?.items });
@@ -162,7 +166,9 @@ function JobDetail() {
           <p className="text-[13.5px] text-foreground/90 leading-relaxed">{j.description}</p>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-border/60">
-            <Field icon={User} label="Customer" value={j.customerName} />
+            <button type="button" className="text-left" onClick={() => setCustomerSheetOpen(true)}>
+              <Field icon={User} label="Customer" value={j.customerName} />
+            </button>
             <Field icon={Phone} label="Phone" value={j.customerPhone ?? "—"} />
             <Field icon={MapPin} label="Location" value={`${j.address}, ${j.city}`} />
           </div>
@@ -198,7 +204,7 @@ function JobDetail() {
             {assigned && (
               <div className="mt-3 space-y-3">
                 <VendorPopover vendor={assigned}>
-                  <button className="flex items-center gap-3 w-full text-left group">
+                  <button className="flex items-center gap-3 w-full text-left group" onDoubleClick={() => setVendorSheetOpen(true)}>
                     <div className="h-10 w-10 rounded-xl bg-brand text-primary-foreground flex items-center justify-center text-[12px] font-semibold shadow-pop">
                       {assigned.name
                         .split(" ")
@@ -218,6 +224,9 @@ function JobDetail() {
                     <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
                   </button>
                 </VendorPopover>
+                <Button variant="outline" size="sm" className="w-full rounded-lg" onClick={() => setVendorSheetOpen(true)}>
+                  View full vendor details <ExternalLink className="h-3.5 w-3.5" />
+                </Button>
                 <DispatchFacts assignment={currentAssignment} assignedBy={assignedBy} />
               </div>
             )}
@@ -329,6 +338,21 @@ function JobDetail() {
           </Tabs>
         </CardContent>
       </Card>
+
+      <VendorDetailSheet
+        vendor={assigned ?? null}
+        assignments={assignments.data?.items ?? []}
+        jobs={[j]}
+        open={vendorSheetOpen}
+        onOpenChange={setVendorSheetOpen}
+      />
+
+      <CustomerDetailSheet
+        customer={customerProfile}
+        jobs={[j]}
+        open={customerSheetOpen}
+        onOpenChange={setCustomerSheetOpen}
+      />
 
       {/* Mobile sticky action bar */}
       <div className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-background/90 backdrop-blur border-t border-border/60 px-4 py-3 flex gap-2">
@@ -927,4 +951,19 @@ function AISummary({
       </div>
     </div>
   );
+}
+
+function buildSingleCustomerProfile(job: Job): CustomerProfile {
+  return {
+    name: job.customerName,
+    jobs: 1,
+    cities: [job.city],
+    regions: [job.region],
+    phones: job.customerPhone ? [job.customerPhone] : [],
+    totalValue: job.estimatedValue,
+    openJobs: ["completed", "cancelled"].includes(job.status) ? 0 : 1,
+    completedJobs: job.status === "completed" ? 1 : 0,
+    urgentJobs: job.priority === "urgent" ? 1 : 0,
+    lastJob: job.createdAt,
+  };
 }

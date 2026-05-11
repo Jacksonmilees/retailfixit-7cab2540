@@ -1,5 +1,5 @@
 import * as React from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import { Card, CardContent } from "@/components/ui/card";
@@ -11,7 +11,8 @@ import { StatusBadge, PriorityBadge, TimeAgo, RiskBadge } from "@/components/com
 import { TableSkeleton } from "@/components/common/Skeletons";
 import { FluentSpinner } from "@/components/common/FluentSpinner";
 import { Search, Plus, RefreshCcw } from "lucide-react";
-import type { JobStatus, JobPriority } from "@/lib/types";
+import { JobDetailSheet, VendorDetailSheet, CustomerDetailSheet, type CustomerProfile } from "@/components/common/DetailSheets";
+import type { Assignment, Job, JobStatus, JobPriority, User } from "@/lib/types";
 import { useRealtime } from "@/hooks/use-realtime";
 import {
   Dialog,
@@ -39,6 +40,9 @@ function JobsList() {
   const [search, setSearch] = React.useState("");
   const [status, setStatus] = React.useState<JobStatus | "all">("all");
   const [priority, setPriority] = React.useState<JobPriority | "all">("all");
+  const [selectedJobId, setSelectedJobId] = React.useState<string | null>(null);
+  const [selectedVendorId, setSelectedVendorId] = React.useState<string | null>(null);
+  const [selectedCustomerName, setSelectedCustomerName] = React.useState<string | null>(null);
 
   const queryKey = ["jobs", { page, search, status, priority }] as const;
   const jobs = useQuery({
@@ -52,10 +56,25 @@ function JobsList() {
         priority: priority === "all" ? undefined : [priority],
       }),
   });
+  const allJobs = useQuery({ queryKey: ["jobs-all"], queryFn: () => api.listJobs({ pageSize: 500 }) });
+  const vendors = useQuery({ queryKey: ["vendors-all"], queryFn: () => api.listVendors({ pageSize: 100 }) });
+  const assignments = useQuery({ queryKey: ["assignments"], queryFn: () => api.listAssignments({ pageSize: 200 }) });
+  const users = useQuery({ queryKey: ["users"], queryFn: () => api.listUsers() });
 
   useRealtime(["job.created", "job.updated", "job.assigned"], () => {
     qc.invalidateQueries({ queryKey: ["jobs"] });
   });
+
+  const visibleJobs = jobs.data?.items ?? [];
+  const allJobItems = allJobs.data?.items ?? visibleJobs;
+  const vendorMap = React.useMemo(() => new Map((vendors.data?.items ?? []).map((vendor) => [vendor.id, vendor])), [vendors.data?.items]);
+  const assignmentMap = React.useMemo(() => new Map((assignments.data?.items ?? []).map((assignment) => [assignment.jobId, assignment])), [assignments.data?.items]);
+  const userMap = React.useMemo(() => new Map((users.data ?? []).map((user) => [user.id, user])), [users.data]);
+  const selectedJob = selectedJobId ? allJobItems.find((job) => job.id === selectedJobId) ?? null : null;
+  const selectedAssignment = selectedJob ? assignmentMap.get(selectedJob.id) : undefined;
+  const selectedJobVendor = selectedAssignment ? vendorMap.get(selectedAssignment.vendorId) : selectedJob?.assignedVendorId ? vendorMap.get(selectedJob.assignedVendorId) : undefined;
+  const selectedVendor = selectedVendorId ? vendorMap.get(selectedVendorId) ?? null : null;
+  const selectedCustomer = selectedCustomerName ? buildCustomerProfile(selectedCustomerName, allJobItems) : null;
 
   return (
     <div className="space-y-4">
@@ -87,7 +106,7 @@ function JobsList() {
       </Card>
 
       {jobs.isLoading ? (
-        <TableSkeleton rows={10} cols={8} />
+        <TableSkeleton rows={10} cols={9} />
       ) : (
       <Card>
         <CardContent className="p-0">
@@ -97,6 +116,7 @@ function JobsList() {
                 <TableHead className="w-[120px]">Reference</TableHead>
                 <TableHead>Title</TableHead>
                 <TableHead>Customer</TableHead>
+                <TableHead>Vendor</TableHead>
                 <TableHead>Category</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Priority</TableHead>
@@ -105,30 +125,70 @@ function JobsList() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {jobs.data?.items.map((j) => (
-                <TableRow key={j.id} className="cursor-pointer">
+              {visibleJobs.map((j) => {
+                const assignedVendor = j.assignedVendorId ? vendorMap.get(j.assignedVendorId) : undefined;
+                return (
+                <TableRow key={j.id} className="cursor-pointer" onClick={() => setSelectedJobId(j.id)}>
                   <TableCell className="font-medium">
-                    <Link to="/jobs/$jobId" params={{ jobId: j.id }} className="text-primary hover:underline">
+                    <button type="button" className="font-mono text-[12px] text-primary hover:underline" onClick={(e) => { e.stopPropagation(); setSelectedJobId(j.id); }}>
                       {j.reference}
-                    </Link>
+                    </button>
                   </TableCell>
                   <TableCell className="max-w-[260px] truncate">{j.title}</TableCell>
-                  <TableCell className="text-muted-foreground">{j.customerName}</TableCell>
+                  <TableCell>
+                    <button type="button" className="text-left text-muted-foreground hover:text-primary" onClick={(e) => { e.stopPropagation(); setSelectedCustomerName(j.customerName); }}>
+                      {j.customerName}
+                    </button>
+                  </TableCell>
+                  <TableCell>
+                    {assignedVendor ? (
+                      <button type="button" className="text-left text-foreground hover:text-primary" onClick={(e) => { e.stopPropagation(); setSelectedVendorId(assignedVendor.id); }}>
+                        {assignedVendor.name}
+                      </button>
+                    ) : (
+                      <span className="text-xs text-muted-foreground">Unassigned</span>
+                    )}
+                  </TableCell>
                   <TableCell>{j.category}</TableCell>
                   <TableCell><StatusBadge status={j.status} /></TableCell>
                   <TableCell><PriorityBadge priority={j.priority} /></TableCell>
                   <TableCell><RiskBadge risk={j.escalationRisk} /></TableCell>
                   <TableCell className="text-right text-xs text-muted-foreground"><TimeAgo iso={j.slaDueAt} /></TableCell>
                 </TableRow>
-              ))}
+                );
+              })}
               {jobs.data && jobs.data.items.length === 0 && (
-                <TableRow><TableCell colSpan={8} className="text-center py-12 text-muted-foreground">No jobs match your filters.</TableCell></TableRow>
+                <TableRow><TableCell colSpan={9} className="text-center py-12 text-muted-foreground">No jobs match your filters.</TableCell></TableRow>
               )}
             </TableBody>
           </Table>
         </CardContent>
       </Card>
       )}
+
+      <JobDetailSheet
+        job={selectedJob}
+        vendor={selectedJobVendor}
+        assignment={selectedAssignment}
+        actorName={selectedAssignment ? actorLabel(selectedAssignment, userMap) : undefined}
+        open={Boolean(selectedJob)}
+        onOpenChange={(open) => !open && setSelectedJobId(null)}
+      />
+
+      <VendorDetailSheet
+        vendor={selectedVendor}
+        assignments={assignments.data?.items ?? []}
+        jobs={allJobItems}
+        open={Boolean(selectedVendor)}
+        onOpenChange={(open) => !open && setSelectedVendorId(null)}
+      />
+
+      <CustomerDetailSheet
+        customer={selectedCustomer}
+        jobs={allJobItems}
+        open={Boolean(selectedCustomer)}
+        onOpenChange={(open) => !open && setSelectedCustomerName(null)}
+      />
 
       {jobs.data && (
         <div className="flex items-center justify-between text-sm text-muted-foreground">
@@ -196,4 +256,35 @@ function NewJobDialog() {
       </DialogContent>
     </Dialog>
   );
+}
+
+function actorLabel(assignment: Assignment, users: ReadonlyMap<string, User>) {
+  if (assignment.assignedBy === "ai") return "AI dispatch engine";
+  return users.get(assignment.assignedBy)?.name ?? assignment.assignedBy;
+}
+
+function buildCustomerProfile(name: string, jobs: Job[]): CustomerProfile {
+  const customerJobs = jobs.filter((job) => job.customerName === name);
+  const cities = unique(customerJobs.map((job) => job.city));
+  const regions = unique(customerJobs.map((job) => job.region));
+  const phones = unique(customerJobs.map((job) => job.customerPhone).filter(Boolean) as string[]);
+  const lastJob = customerJobs
+    .map((job) => job.createdAt)
+    .sort((a, b) => new Date(b).getTime() - new Date(a).getTime())[0];
+  return {
+    name,
+    jobs: customerJobs.length,
+    cities,
+    regions,
+    phones,
+    totalValue: customerJobs.reduce((sum, job) => sum + job.estimatedValue, 0),
+    openJobs: customerJobs.filter((job) => !["completed", "cancelled"].includes(job.status)).length,
+    completedJobs: customerJobs.filter((job) => job.status === "completed").length,
+    urgentJobs: customerJobs.filter((job) => job.priority === "urgent").length,
+    lastJob,
+  };
+}
+
+function unique(values: string[]) {
+  return Array.from(new Set(values.filter(Boolean)));
 }
