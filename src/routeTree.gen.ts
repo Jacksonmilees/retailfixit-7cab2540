@@ -16,13 +16,17 @@ import { Route as AppVendorsRouteImport } from './routes/_app/vendors'
 import { Route as AppUsersRouteImport } from './routes/_app/users'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppReportsRouteImport } from './routes/_app/reports'
+import { Route as AppRbacRouteImport } from './routes/_app/rbac'
+import { Route as AppObservabilityRouteImport } from './routes/_app/observability'
 import { Route as AppNotificationsRouteImport } from './routes/_app/notifications'
 import { Route as AppJobsRouteImport } from './routes/_app/jobs'
+import { Route as AppHealthRouteImport } from './routes/_app/health'
 import { Route as AppFeatureFlagsRouteImport } from './routes/_app/feature-flags'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppCustomersRouteImport } from './routes/_app/customers'
 import { Route as AppAuditRouteImport } from './routes/_app/audit'
 import { Route as AppAssignmentsRouteImport } from './routes/_app/assignments'
+import { Route as AppAiGovernanceRouteImport } from './routes/_app/ai-governance'
 import { Route as AppAiEvalRouteImport } from './routes/_app/ai-eval'
 import { Route as AppAiRouteImport } from './routes/_app/ai'
 import { Route as AppVendorsVendorIdRouteImport } from './routes/_app/vendors.$vendorId'
@@ -62,6 +66,16 @@ const AppReportsRoute = AppReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => AppRoute,
 } as any)
+const AppRbacRoute = AppRbacRouteImport.update({
+  id: '/rbac',
+  path: '/rbac',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppObservabilityRoute = AppObservabilityRouteImport.update({
+  id: '/observability',
+  path: '/observability',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppNotificationsRoute = AppNotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
@@ -70,6 +84,11 @@ const AppNotificationsRoute = AppNotificationsRouteImport.update({
 const AppJobsRoute = AppJobsRouteImport.update({
   id: '/jobs',
   path: '/jobs',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppHealthRoute = AppHealthRouteImport.update({
+  id: '/health',
+  path: '/health',
   getParentRoute: () => AppRoute,
 } as any)
 const AppFeatureFlagsRoute = AppFeatureFlagsRouteImport.update({
@@ -95,6 +114,11 @@ const AppAuditRoute = AppAuditRouteImport.update({
 const AppAssignmentsRoute = AppAssignmentsRouteImport.update({
   id: '/assignments',
   path: '/assignments',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAiGovernanceRoute = AppAiGovernanceRouteImport.update({
+  id: '/ai-governance',
+  path: '/ai-governance',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAiEvalRoute = AppAiEvalRouteImport.update({
@@ -123,13 +147,17 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/ai': typeof AppAiRoute
   '/ai-eval': typeof AppAiEvalRoute
+  '/ai-governance': typeof AppAiGovernanceRoute
   '/assignments': typeof AppAssignmentsRoute
   '/audit': typeof AppAuditRoute
   '/customers': typeof AppCustomersRoute
   '/dashboard': typeof AppDashboardRoute
   '/feature-flags': typeof AppFeatureFlagsRoute
+  '/health': typeof AppHealthRoute
   '/jobs': typeof AppJobsRouteWithChildren
   '/notifications': typeof AppNotificationsRoute
+  '/observability': typeof AppObservabilityRoute
+  '/rbac': typeof AppRbacRoute
   '/reports': typeof AppReportsRoute
   '/settings': typeof AppSettingsRoute
   '/users': typeof AppUsersRoute
@@ -142,13 +170,17 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/ai': typeof AppAiRoute
   '/ai-eval': typeof AppAiEvalRoute
+  '/ai-governance': typeof AppAiGovernanceRoute
   '/assignments': typeof AppAssignmentsRoute
   '/audit': typeof AppAuditRoute
   '/customers': typeof AppCustomersRoute
   '/dashboard': typeof AppDashboardRoute
   '/feature-flags': typeof AppFeatureFlagsRoute
+  '/health': typeof AppHealthRoute
   '/jobs': typeof AppJobsRouteWithChildren
   '/notifications': typeof AppNotificationsRoute
+  '/observability': typeof AppObservabilityRoute
+  '/rbac': typeof AppRbacRoute
   '/reports': typeof AppReportsRoute
   '/settings': typeof AppSettingsRoute
   '/users': typeof AppUsersRoute
@@ -163,13 +195,17 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_app/ai': typeof AppAiRoute
   '/_app/ai-eval': typeof AppAiEvalRoute
+  '/_app/ai-governance': typeof AppAiGovernanceRoute
   '/_app/assignments': typeof AppAssignmentsRoute
   '/_app/audit': typeof AppAuditRoute
   '/_app/customers': typeof AppCustomersRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/feature-flags': typeof AppFeatureFlagsRoute
+  '/_app/health': typeof AppHealthRoute
   '/_app/jobs': typeof AppJobsRouteWithChildren
   '/_app/notifications': typeof AppNotificationsRoute
+  '/_app/observability': typeof AppObservabilityRoute
+  '/_app/rbac': typeof AppRbacRoute
   '/_app/reports': typeof AppReportsRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/users': typeof AppUsersRoute
@@ -184,13 +220,17 @@ export interface FileRouteTypes {
     | '/login'
     | '/ai'
     | '/ai-eval'
+    | '/ai-governance'
     | '/assignments'
     | '/audit'
     | '/customers'
     | '/dashboard'
     | '/feature-flags'
+    | '/health'
     | '/jobs'
     | '/notifications'
+    | '/observability'
+    | '/rbac'
     | '/reports'
     | '/settings'
     | '/users'
@@ -203,13 +243,17 @@ export interface FileRouteTypes {
     | '/login'
     | '/ai'
     | '/ai-eval'
+    | '/ai-governance'
     | '/assignments'
     | '/audit'
     | '/customers'
     | '/dashboard'
     | '/feature-flags'
+    | '/health'
     | '/jobs'
     | '/notifications'
+    | '/observability'
+    | '/rbac'
     | '/reports'
     | '/settings'
     | '/users'
@@ -223,13 +267,17 @@ export interface FileRouteTypes {
     | '/login'
     | '/_app/ai'
     | '/_app/ai-eval'
+    | '/_app/ai-governance'
     | '/_app/assignments'
     | '/_app/audit'
     | '/_app/customers'
     | '/_app/dashboard'
     | '/_app/feature-flags'
+    | '/_app/health'
     | '/_app/jobs'
     | '/_app/notifications'
+    | '/_app/observability'
+    | '/_app/rbac'
     | '/_app/reports'
     | '/_app/settings'
     | '/_app/users'
@@ -295,6 +343,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppReportsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/rbac': {
+      id: '/_app/rbac'
+      path: '/rbac'
+      fullPath: '/rbac'
+      preLoaderRoute: typeof AppRbacRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/observability': {
+      id: '/_app/observability'
+      path: '/observability'
+      fullPath: '/observability'
+      preLoaderRoute: typeof AppObservabilityRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/notifications': {
       id: '/_app/notifications'
       path: '/notifications'
@@ -307,6 +369,13 @@ declare module '@tanstack/react-router' {
       path: '/jobs'
       fullPath: '/jobs'
       preLoaderRoute: typeof AppJobsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/health': {
+      id: '/_app/health'
+      path: '/health'
+      fullPath: '/health'
+      preLoaderRoute: typeof AppHealthRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/feature-flags': {
@@ -342,6 +411,13 @@ declare module '@tanstack/react-router' {
       path: '/assignments'
       fullPath: '/assignments'
       preLoaderRoute: typeof AppAssignmentsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ai-governance': {
+      id: '/_app/ai-governance'
+      path: '/ai-governance'
+      fullPath: '/ai-governance'
+      preLoaderRoute: typeof AppAiGovernanceRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/ai-eval': {
@@ -401,13 +477,17 @@ const AppVendorsRouteWithChildren = AppVendorsRoute._addFileChildren(
 interface AppRouteChildren {
   AppAiRoute: typeof AppAiRoute
   AppAiEvalRoute: typeof AppAiEvalRoute
+  AppAiGovernanceRoute: typeof AppAiGovernanceRoute
   AppAssignmentsRoute: typeof AppAssignmentsRoute
   AppAuditRoute: typeof AppAuditRoute
   AppCustomersRoute: typeof AppCustomersRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppFeatureFlagsRoute: typeof AppFeatureFlagsRoute
+  AppHealthRoute: typeof AppHealthRoute
   AppJobsRoute: typeof AppJobsRouteWithChildren
   AppNotificationsRoute: typeof AppNotificationsRoute
+  AppObservabilityRoute: typeof AppObservabilityRoute
+  AppRbacRoute: typeof AppRbacRoute
   AppReportsRoute: typeof AppReportsRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppUsersRoute: typeof AppUsersRoute
@@ -417,13 +497,17 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAiRoute: AppAiRoute,
   AppAiEvalRoute: AppAiEvalRoute,
+  AppAiGovernanceRoute: AppAiGovernanceRoute,
   AppAssignmentsRoute: AppAssignmentsRoute,
   AppAuditRoute: AppAuditRoute,
   AppCustomersRoute: AppCustomersRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppFeatureFlagsRoute: AppFeatureFlagsRoute,
+  AppHealthRoute: AppHealthRoute,
   AppJobsRoute: AppJobsRouteWithChildren,
   AppNotificationsRoute: AppNotificationsRoute,
+  AppObservabilityRoute: AppObservabilityRoute,
+  AppRbacRoute: AppRbacRoute,
   AppReportsRoute: AppReportsRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppUsersRoute: AppUsersRoute,
