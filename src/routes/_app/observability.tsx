@@ -32,7 +32,7 @@ const traces = [
   { id: "tr_8f25", route: "GET /api/vendors", status: 200, ms: 71, ts: "12:41:50", spans: 3 },
 ];
 
-export default function ObservabilityPage() {
+function ObservabilityPage() {
   return (
     <div className="space-y-5">
       <PageHeader title="Observability" description="Traces, metrics, and event lag — Application Insights mirror" icon={Activity} actions={<LiveDot />} />
