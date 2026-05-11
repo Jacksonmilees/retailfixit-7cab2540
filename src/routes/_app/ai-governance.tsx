@@ -60,8 +60,8 @@ function AIGovernancePage() {
       <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
         <MetricCard label="Active model" value={model} icon={Sparkles} />
         <MetricCard label="Prompt version" value={promptVersion} icon={GitBranch} />
-        <MetricCard label="Override rate (7d)" value="14.2%" icon={AlertTriangle} delta={{ value: -2.1, label: "vs last week" }} />
-        <MetricCard label="Avg cost / rec" value="$0.0042" icon={DollarSign} delta={{ value: -8, label: "vs last week" }} />
+        <MetricCard label="Override rate (7d)" value="14.2%" icon={AlertTriangle} delta="-2.1% vs last week" trend="down" />
+        <MetricCard label="Avg cost / rec" value="$0.0042" icon={DollarSign} delta="-8% vs last week" trend="down" />
       </div>
 
       <Tabs defaultValue="model" className="space-y-4">
@@ -172,7 +172,7 @@ function AIGovernancePage() {
           <div className="grid gap-3 md:grid-cols-3">
             <MetricCard label="Tokens (24h)" value="1.42M" icon={Sparkles} />
             <MetricCard label="Cost (24h)" value="$5.96" icon={DollarSign} />
-            <MetricCard label="Cache hit rate" value="68%" icon={GitBranch} delta={{ value: 4, label: "vs last week" }} />
+            <MetricCard label="Cache hit rate" value="68%" icon={GitBranch} delta="+4% vs last week" trend="up" />
           </div>
           <SectionCard title="Cost controls" description="Caps that protect against runaway spend">
             <div className="grid gap-4 md:grid-cols-2">
