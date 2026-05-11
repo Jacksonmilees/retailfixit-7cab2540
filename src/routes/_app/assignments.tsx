@@ -3,10 +3,23 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import { Card, CardContent } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import { StatusBadge, PriorityBadge, RiskBadge, TimeAgo } from "@/components/common/badges";
 import { TableSkeleton } from "@/components/common/Skeletons";
 import { PageHeader, EmptyState } from "@/components/common/PageHeader";
@@ -30,13 +43,25 @@ export const Route = createFileRoute("/_app/assignments")({
 
 function AssignmentsPage() {
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
-  const all = useQuery({ queryKey: ["assignments"], queryFn: () => api.listAssignments({ pageSize: 100 }) });
-  const vendors = useQuery({ queryKey: ["vendors-all"], queryFn: () => api.listVendors({ pageSize: 100 }) });
+  const all = useQuery({
+    queryKey: ["assignments"],
+    queryFn: () => api.listAssignments({ pageSize: 100 }),
+  });
+  const vendors = useQuery({
+    queryKey: ["vendors-all"],
+    queryFn: () => api.listVendors({ pageSize: 100 }),
+  });
   const jobs = useQuery({ queryKey: ["jobs-all"], queryFn: () => api.listJobs({ pageSize: 200 }) });
   const users = useQuery({ queryKey: ["users"], queryFn: () => api.listUsers() });
 
-  const vmap = React.useMemo(() => new Map((vendors.data?.items ?? []).map((v) => [v.id, v])), [vendors.data?.items]);
-  const jmap = React.useMemo(() => new Map((jobs.data?.items ?? []).map((j) => [j.id, j])), [jobs.data?.items]);
+  const vmap = React.useMemo(
+    () => new Map((vendors.data?.items ?? []).map((v) => [v.id, v])),
+    [vendors.data?.items],
+  );
+  const jmap = React.useMemo(
+    () => new Map((jobs.data?.items ?? []).map((j) => [j.id, j])),
+    [jobs.data?.items],
+  );
   const umap = React.useMemo(() => new Map((users.data ?? []).map((u) => [u.id, u])), [users.data]);
   const selected = all.data?.items.find((a) => a.id === selectedId) ?? null;
 
@@ -53,86 +78,140 @@ function AssignmentsPage() {
       ) : !all.data?.items.length ? (
         <Card className="border-border/60 shadow-card rounded-2xl">
           <CardContent>
-            <EmptyState icon={ArrowRightLeft} title="No assignments yet" description="Dispatched vendors will appear here as soon as the first job is assigned." />
+            <EmptyState
+              icon={ArrowRightLeft}
+              title="No assignments yet"
+              description="Dispatched vendors will appear here as soon as the first job is assigned."
+            />
           </CardContent>
         </Card>
       ) : (
         <>
-        <Card className="hidden md:block border-border/60 shadow-card rounded-2xl overflow-hidden">
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow className="hover:bg-transparent">
-                  <TableHead className="text-[11px] uppercase tracking-wider">Job</TableHead>
-                  <TableHead className="text-[11px] uppercase tracking-wider">Vendor</TableHead>
-                  <TableHead className="text-[11px] uppercase tracking-wider">Source</TableHead>
-                  <TableHead className="text-[11px] uppercase tracking-wider">Status</TableHead>
-                  <TableHead className="text-[11px] uppercase tracking-wider">Elapsed</TableHead>
-                  <TableHead className="text-right text-[11px] uppercase tracking-wider">Assigned</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {all.data.items.map((a) => {
-                  const j = jmap.get(a.jobId);
-                  const v = vmap.get(a.vendorId);
-                  return (
-                    <TableRow key={a.id} className="text-[13px] cursor-pointer" onClick={() => setSelectedId(a.id)}>
-                      <TableCell>
-                        {j ? (
-                          <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedId(a.id); }} className="font-mono text-[12px] text-primary hover:underline">{j.reference}</button>
-                        ) : <span className="font-mono text-[12px]">{a.jobId}</span>}
-                        <div className="text-[11px] text-muted-foreground truncate max-w-[260px] mt-0.5">{j?.title}</div>
-                      </TableCell>
-                      <TableCell>
-                        {v ? (
-                          <button type="button" onClick={(e) => { e.stopPropagation(); setSelectedId(a.id); }} className="hover:text-primary transition-colors">{v.name}</button>
-                        ) : a.vendorId}
-                      </TableCell>
-                      <TableCell>
-                        <SourceBadge assignment={a} />
-                      </TableCell>
-                      <TableCell><AssignmentStatusBadge assignment={a} /></TableCell>
-                      <TableCell className="text-[11px] text-muted-foreground">{formatDuration(a.assignedAt, a.completedAt ?? a.acceptedAt)}</TableCell>
-                      <TableCell className="text-right text-[11px] text-muted-foreground"><TimeAgo iso={a.assignedAt} /></TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
+          <Card className="hidden md:block border-border/60 shadow-card rounded-2xl overflow-hidden">
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead className="text-[11px] uppercase tracking-wider">Job</TableHead>
+                    <TableHead className="text-[11px] uppercase tracking-wider">Vendor</TableHead>
+                    <TableHead className="text-[11px] uppercase tracking-wider">Source</TableHead>
+                    <TableHead className="text-[11px] uppercase tracking-wider">Status</TableHead>
+                    <TableHead className="text-[11px] uppercase tracking-wider">Elapsed</TableHead>
+                    <TableHead className="text-right text-[11px] uppercase tracking-wider">
+                      Assigned
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {all.data.items.map((a) => {
+                    const j = jmap.get(a.jobId);
+                    const v = vmap.get(a.vendorId);
+                    return (
+                      <TableRow
+                        key={a.id}
+                        className="text-[13px] cursor-pointer"
+                        onClick={() => setSelectedId(a.id)}
+                      >
+                        <TableCell>
+                          {j ? (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedId(a.id);
+                              }}
+                              className="font-mono text-[12px] text-primary hover:underline"
+                            >
+                              {j.reference}
+                            </button>
+                          ) : (
+                            <span className="font-mono text-[12px]">{a.jobId}</span>
+                          )}
+                          <div className="text-[11px] text-muted-foreground truncate max-w-[260px] mt-0.5">
+                            {j?.title}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {v ? (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setSelectedId(a.id);
+                              }}
+                              className="hover:text-primary transition-colors"
+                            >
+                              {v.name}
+                            </button>
+                          ) : (
+                            a.vendorId
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <SourceBadge assignment={a} />
+                        </TableCell>
+                        <TableCell>
+                          <AssignmentStatusBadge assignment={a} />
+                        </TableCell>
+                        <TableCell className="text-[11px] text-muted-foreground">
+                          {formatDuration(a.assignedAt, a.completedAt ?? a.acceptedAt)}
+                        </TableCell>
+                        <TableCell className="text-right text-[11px] text-muted-foreground">
+                          <TimeAgo iso={a.assignedAt} />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
 
-        <div className="grid gap-3 md:hidden">
-          {all.data.items.map((a) => {
-            const j = jmap.get(a.jobId);
-            const v = vmap.get(a.vendorId);
-            return (
-              <button key={a.id} type="button" onClick={() => setSelectedId(a.id)} className="text-left rounded-2xl border border-border/60 bg-card p-4 shadow-card transition-colors hover:bg-bg-secondary/70">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <div className="font-mono text-[11px] text-primary">{j?.reference ?? a.jobId}</div>
-                    <div className="mt-1 text-[14px] font-semibold leading-tight truncate">{j?.title ?? "Assignment"}</div>
-                    <div className="mt-1 text-[12px] text-muted-foreground truncate">{v?.name ?? a.vendorId}</div>
+          <div className="grid gap-3 md:hidden">
+            {all.data.items.map((a) => {
+              const j = jmap.get(a.jobId);
+              const v = vmap.get(a.vendorId);
+              return (
+                <button
+                  key={a.id}
+                  type="button"
+                  onClick={() => setSelectedId(a.id)}
+                  className="text-left rounded-2xl border border-border/60 bg-card p-4 shadow-card transition-colors hover:bg-bg-secondary/70"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <div className="font-mono text-[11px] text-primary">
+                        {j?.reference ?? a.jobId}
+                      </div>
+                      <div className="mt-1 text-[14px] font-semibold leading-tight truncate">
+                        {j?.title ?? "Assignment"}
+                      </div>
+                      <div className="mt-1 text-[12px] text-muted-foreground truncate">
+                        {v?.name ?? a.vendorId}
+                      </div>
+                    </div>
+                    <AssignmentStatusBadge assignment={a} />
                   </div>
-                  <AssignmentStatusBadge assignment={a} />
-                </div>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <SourceBadge assignment={a} />
-                  <Badge variant="outline" className="text-[10px] gap-1"><Timer className="h-3 w-3" />{formatDuration(a.assignedAt, a.completedAt ?? a.acceptedAt)}</Badge>
-                </div>
-              </button>
-            );
-          })}
-        </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <SourceBadge assignment={a} />
+                    <Badge variant="outline" className="text-[10px] gap-1">
+                      <Timer className="h-3 w-3" />
+                      {formatDuration(a.assignedAt, a.completedAt ?? a.acceptedAt)}
+                    </Badge>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
 
-        <AssignmentDetailSheet
-          assignment={selected}
-          job={selected ? jmap.get(selected.jobId) : undefined}
-          vendor={selected ? vmap.get(selected.vendorId) : undefined}
-          actorName={selected ? actorLabel(selected, umap) : ""}
-          open={Boolean(selected)}
-          onOpenChange={(open) => !open && setSelectedId(null)}
-        />
+          <AssignmentDetailSheet
+            assignment={selected}
+            job={selected ? jmap.get(selected.jobId) : undefined}
+            vendor={selected ? vmap.get(selected.vendorId) : undefined}
+            actorName={selected ? actorLabel(selected, umap) : ""}
+            open={Boolean(selected)}
+            onOpenChange={(open) => !open && setSelectedId(null)}
+          />
         </>
       )}
     </div>
@@ -154,11 +233,15 @@ function AssignmentStatusBadge({ assignment }: { assignment: Assignment }) {
     assignment.status === "completed"
       ? "bg-success/15 text-success border-success/30"
       : assignment.status === "accepted"
-      ? "bg-primary/10 text-primary border-primary/30"
-      : assignment.status === "declined"
-      ? "bg-destructive/15 text-destructive border-destructive/30"
-      : "bg-warning/15 text-foreground border-warning/40";
-  return <Badge variant="outline" className={`text-[10px] capitalize ${cls}`}>{assignment.status}</Badge>;
+        ? "bg-primary/10 text-primary border-primary/30"
+        : assignment.status === "declined"
+          ? "bg-destructive/15 text-destructive border-destructive/30"
+          : "bg-warning/15 text-foreground border-warning/40";
+  return (
+    <Badge variant="outline" className={`text-[10px] capitalize ${cls}`}>
+      {assignment.status}
+    </Badge>
+  );
 }
 
 function AssignmentDetailSheet({
@@ -184,8 +267,12 @@ function AssignmentDetailSheet({
         <SheetHeader className="border-b border-border/60 p-5 text-left">
           <div className="flex items-start justify-between gap-4 pr-8">
             <div className="min-w-0">
-              <SheetTitle className="text-[20px] tracking-tight">{job?.reference ?? assignment.jobId}</SheetTitle>
-              <SheetDescription className="mt-1 line-clamp-2">{job?.title ?? "Dispatch assignment details"}</SheetDescription>
+              <SheetTitle className="text-[20px] tracking-tight">
+                {job?.reference ?? assignment.jobId}
+              </SheetTitle>
+              <SheetDescription className="mt-1 line-clamp-2">
+                {job?.title ?? "Dispatch assignment details"}
+              </SheetDescription>
             </div>
             <SourceBadge assignment={assignment} />
           </div>
@@ -195,29 +282,57 @@ function AssignmentDetailSheet({
           <section className="rounded-2xl border border-border/60 bg-card p-4 shadow-card">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Dispatch status</div>
-                <div className="mt-1 flex items-center gap-2"><AssignmentStatusBadge assignment={assignment} /><span className="text-[12px] text-muted-foreground">by {actorName}</span></div>
+                <div className="text-[11px] uppercase tracking-wider text-muted-foreground">
+                  Dispatch status
+                </div>
+                <div className="mt-1 flex items-center gap-2">
+                  <AssignmentStatusBadge assignment={assignment} />
+                  <span className="text-[12px] text-muted-foreground">by {actorName}</span>
+                </div>
               </div>
-              <div className="h-10 w-10 rounded-xl bg-bg-tertiary text-primary flex items-center justify-center"><ArrowRightLeft className="h-4 w-4" /></div>
+              <div className="h-10 w-10 rounded-xl bg-bg-tertiary text-primary flex items-center justify-center">
+                <ArrowRightLeft className="h-4 w-4" />
+              </div>
             </div>
             <div className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-4">
               <Metric label="Assigned" value={formatDateTime(assignment.assignedAt)} />
-              <Metric label="Accepted" value={assignment.acceptedAt ? formatDateTime(assignment.acceptedAt) : "Waiting"} />
-              <Metric label="Completed" value={assignment.completedAt ? formatDateTime(assignment.completedAt) : "—"} />
-              <Metric label="Elapsed" value={formatDuration(assignment.assignedAt, assignment.completedAt ?? assignment.acceptedAt)} />
+              <Metric
+                label="Accepted"
+                value={assignment.acceptedAt ? formatDateTime(assignment.acceptedAt) : "Waiting"}
+              />
+              <Metric
+                label="Completed"
+                value={assignment.completedAt ? formatDateTime(assignment.completedAt) : "—"}
+              />
+              <Metric
+                label="Elapsed"
+                value={formatDuration(
+                  assignment.assignedAt,
+                  assignment.completedAt ?? assignment.acceptedAt,
+                )}
+              />
             </div>
-            {assignment.notes && <div className="mt-3 rounded-xl bg-bg-secondary p-3 text-[12px] text-foreground/80">{assignment.notes}</div>}
+            {assignment.notes && (
+              <div className="mt-3 rounded-xl bg-bg-secondary p-3 text-[12px] text-foreground/80">
+                {assignment.notes}
+              </div>
+            )}
           </section>
 
           {job && (
             <section className="rounded-2xl border border-border/60 bg-card p-4 shadow-card">
               <div className="mb-3 flex items-start justify-between gap-3">
                 <div>
-                  <div className="flex items-center gap-2 text-[13px] font-semibold"><Wrench className="h-4 w-4 text-primary" />Job details</div>
+                  <div className="flex items-center gap-2 text-[13px] font-semibold">
+                    <Wrench className="h-4 w-4 text-primary" />
+                    Job details
+                  </div>
                   <p className="mt-1 text-[12px] text-muted-foreground">{job.description}</p>
                 </div>
                 <Button variant="outline" size="sm" asChild className="rounded-lg">
-                  <Link to="/jobs/$jobId" params={{ jobId: job.id }}>Open <ExternalLink className="h-3.5 w-3.5" /></Link>
+                  <Link to="/jobs/$jobId" params={{ jobId: job.id }}>
+                    Open <ExternalLink className="h-3.5 w-3.5" />
+                  </Link>
                 </Button>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -226,10 +341,22 @@ function AssignmentDetailSheet({
                 <RiskBadge risk={job.escalationRisk} />
               </div>
               <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                <Info icon={UserIcon} label="Customer" value={`${job.customerName}${job.customerPhone ? ` · ${job.customerPhone}` : ""}`} />
-                <Info icon={MapPin} label="Location" value={`${job.address}, ${job.city}, ${job.region}`} />
+                <Info
+                  icon={UserIcon}
+                  label="Customer"
+                  value={`${job.customerName}${job.customerPhone ? ` · ${job.customerPhone}` : ""}`}
+                />
+                <Info
+                  icon={MapPin}
+                  label="Location"
+                  value={`${job.address}, ${job.city}, ${job.region}`}
+                />
                 <Info icon={Clock} label="SLA" value={formatDateTime(job.slaDueAt)} />
-                <Info icon={Sparkles} label="AI complexity" value={job.complexityScore != null ? `${job.complexityScore}/100` : "Not scored"} />
+                <Info
+                  icon={Sparkles}
+                  label="AI complexity"
+                  value={job.complexityScore != null ? `${job.complexityScore}/100` : "Not scored"}
+                />
               </div>
             </section>
           )}
@@ -238,23 +365,40 @@ function AssignmentDetailSheet({
             <section className="rounded-2xl border border-border/60 bg-card p-4 shadow-card">
               <div className="mb-3 flex items-start justify-between gap-3">
                 <div className="flex min-w-0 items-center gap-3">
-                  <div className="h-11 w-11 rounded-xl bg-brand text-primary-foreground flex items-center justify-center text-[13px] font-semibold shadow-pop">{initials(vendor.name)}</div>
+                  <div className="h-11 w-11 rounded-xl bg-brand text-primary-foreground flex items-center justify-center text-[13px] font-semibold shadow-pop">
+                    {initials(vendor.name)}
+                  </div>
                   <div className="min-w-0">
                     <div className="truncate text-[14px] font-semibold">{vendor.name}</div>
-                    <div className="text-[12px] text-muted-foreground">★ {vendor.rating} · {vendor.activeJobs}/{vendor.capacity} active · {vendor.avgResponseMinutes}m avg response</div>
+                    <div className="text-[12px] text-muted-foreground">
+                      ★ {vendor.rating} · {vendor.activeJobs}/{vendor.capacity} active ·{" "}
+                      {vendor.avgResponseMinutes}m avg response
+                    </div>
                   </div>
                 </div>
                 <Button variant="outline" size="sm" asChild className="rounded-lg">
-                  <Link to="/vendors/$vendorId" params={{ vendorId: vendor.id }}>Open <ExternalLink className="h-3.5 w-3.5" /></Link>
+                  <Link to="/vendors/$vendorId" params={{ vendorId: vendor.id }}>
+                    Open <ExternalLink className="h-3.5 w-3.5" />
+                  </Link>
                 </Button>
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
                 <Info icon={Phone} label="Phone" value={vendor.phone} />
                 <Info icon={UserIcon} label="Email" value={vendor.email} />
                 <Info icon={MapPin} label="Regions" value={vendor.regions.join(", ")} />
-                <Info icon={CheckCircle2} label="Completed jobs" value={vendor.completedJobs.toLocaleString()} />
+                <Info
+                  icon={CheckCircle2}
+                  label="Completed jobs"
+                  value={vendor.completedJobs.toLocaleString()}
+                />
               </div>
-              <div className="mt-3 flex flex-wrap gap-1.5">{vendor.categories.map((category) => <Badge key={category} variant="secondary" className="text-[10px]">{category}</Badge>)}</div>
+              <div className="mt-3 flex flex-wrap gap-1.5">
+                {vendor.categories.map((category) => (
+                  <Badge key={category} variant="secondary" className="text-[10px]">
+                    {category}
+                  </Badge>
+                ))}
+              </div>
             </section>
           )}
         </div>
@@ -272,7 +416,15 @@ function Metric({ label, value }: { label: string; value: string }) {
   );
 }
 
-function Info({ icon: Icon, label, value }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string | number }) {
+function Info({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string | number;
+}) {
   return (
     <div className="flex items-start gap-2 rounded-xl bg-bg-secondary p-3">
       <Icon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-muted-foreground" />
@@ -290,11 +442,20 @@ function actorLabel(assignment: Assignment, users: ReadonlyMap<string, { name: s
 }
 
 function initials(name: string) {
-  return name.split(" ").map((word) => word[0]).slice(0, 2).join("");
+  return name
+    .split(" ")
+    .map((word) => word[0])
+    .slice(0, 2)
+    .join("");
 }
 
 function formatDateTime(iso: string) {
-  return new Date(iso).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  return new Date(iso).toLocaleString([], {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 function formatDuration(startIso: string, endIso?: string) {
