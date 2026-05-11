@@ -20,6 +20,7 @@ import { toast } from "sonner";
 
 const TITLES: Record<string, string> = {
   "/": "Dashboard",
+  "/dashboard": "Dashboard",
   "/jobs": "Jobs",
   "/vendors": "Vendors",
   "/assignments": "Assignments",

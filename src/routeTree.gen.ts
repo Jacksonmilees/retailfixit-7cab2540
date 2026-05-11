@@ -12,7 +12,15 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppVendorsRouteImport } from './routes/_app/vendors'
+import { Route as AppUsersRouteImport } from './routes/_app/users'
+import { Route as AppSettingsRouteImport } from './routes/_app/settings'
+import { Route as AppJobsRouteImport } from './routes/_app/jobs'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppAuditRouteImport } from './routes/_app/audit'
+import { Route as AppAssignmentsRouteImport } from './routes/_app/assignments'
+import { Route as AppAiRouteImport } from './routes/_app/ai'
+import { Route as AppJobsJobIdRouteImport } from './routes/_app/jobs.$jobId'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -28,35 +36,134 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppVendorsRoute = AppVendorsRouteImport.update({
+  id: '/vendors',
+  path: '/vendors',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppUsersRoute = AppUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSettingsRoute = AppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppJobsRoute = AppJobsRouteImport.update({
+  id: '/jobs',
+  path: '/jobs',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAuditRoute = AppAuditRouteImport.update({
+  id: '/audit',
+  path: '/audit',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAssignmentsRoute = AppAssignmentsRouteImport.update({
+  id: '/assignments',
+  path: '/assignments',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAiRoute = AppAiRouteImport.update({
+  id: '/ai',
+  path: '/ai',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppJobsJobIdRoute = AppJobsJobIdRouteImport.update({
+  id: '/$jobId',
+  path: '/$jobId',
+  getParentRoute: () => AppJobsRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/ai': typeof AppAiRoute
+  '/assignments': typeof AppAssignmentsRoute
+  '/audit': typeof AppAuditRoute
   '/dashboard': typeof AppDashboardRoute
+  '/jobs': typeof AppJobsRouteWithChildren
+  '/settings': typeof AppSettingsRoute
+  '/users': typeof AppUsersRoute
+  '/vendors': typeof AppVendorsRoute
+  '/jobs/$jobId': typeof AppJobsJobIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/ai': typeof AppAiRoute
+  '/assignments': typeof AppAssignmentsRoute
+  '/audit': typeof AppAuditRoute
   '/dashboard': typeof AppDashboardRoute
+  '/jobs': typeof AppJobsRouteWithChildren
+  '/settings': typeof AppSettingsRoute
+  '/users': typeof AppUsersRoute
+  '/vendors': typeof AppVendorsRoute
+  '/jobs/$jobId': typeof AppJobsJobIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
+  '/_app/ai': typeof AppAiRoute
+  '/_app/assignments': typeof AppAssignmentsRoute
+  '/_app/audit': typeof AppAuditRoute
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/jobs': typeof AppJobsRouteWithChildren
+  '/_app/settings': typeof AppSettingsRoute
+  '/_app/users': typeof AppUsersRoute
+  '/_app/vendors': typeof AppVendorsRoute
+  '/_app/jobs/$jobId': typeof AppJobsJobIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/dashboard'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/ai'
+    | '/assignments'
+    | '/audit'
+    | '/dashboard'
+    | '/jobs'
+    | '/settings'
+    | '/users'
+    | '/vendors'
+    | '/jobs/$jobId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/dashboard'
-  id: '__root__' | '/' | '/_app' | '/login' | '/_app/dashboard'
+  to:
+    | '/'
+    | '/login'
+    | '/ai'
+    | '/assignments'
+    | '/audit'
+    | '/dashboard'
+    | '/jobs'
+    | '/settings'
+    | '/users'
+    | '/vendors'
+    | '/jobs/$jobId'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/login'
+    | '/_app/ai'
+    | '/_app/assignments'
+    | '/_app/audit'
+    | '/_app/dashboard'
+    | '/_app/jobs'
+    | '/_app/settings'
+    | '/_app/users'
+    | '/_app/vendors'
+    | '/_app/jobs/$jobId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -88,6 +195,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/vendors': {
+      id: '/_app/vendors'
+      path: '/vendors'
+      fullPath: '/vendors'
+      preLoaderRoute: typeof AppVendorsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/users': {
+      id: '/_app/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof AppUsersRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/settings': {
+      id: '/_app/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AppSettingsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/jobs': {
+      id: '/_app/jobs'
+      path: '/jobs'
+      fullPath: '/jobs'
+      preLoaderRoute: typeof AppJobsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/dashboard': {
       id: '/_app/dashboard'
       path: '/dashboard'
@@ -95,15 +230,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/audit': {
+      id: '/_app/audit'
+      path: '/audit'
+      fullPath: '/audit'
+      preLoaderRoute: typeof AppAuditRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/assignments': {
+      id: '/_app/assignments'
+      path: '/assignments'
+      fullPath: '/assignments'
+      preLoaderRoute: typeof AppAssignmentsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/ai': {
+      id: '/_app/ai'
+      path: '/ai'
+      fullPath: '/ai'
+      preLoaderRoute: typeof AppAiRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/jobs/$jobId': {
+      id: '/_app/jobs/$jobId'
+      path: '/$jobId'
+      fullPath: '/jobs/$jobId'
+      preLoaderRoute: typeof AppJobsJobIdRouteImport
+      parentRoute: typeof AppJobsRoute
+    }
   }
 }
 
+interface AppJobsRouteChildren {
+  AppJobsJobIdRoute: typeof AppJobsJobIdRoute
+}
+
+const AppJobsRouteChildren: AppJobsRouteChildren = {
+  AppJobsJobIdRoute: AppJobsJobIdRoute,
+}
+
+const AppJobsRouteWithChildren =
+  AppJobsRoute._addFileChildren(AppJobsRouteChildren)
+
 interface AppRouteChildren {
+  AppAiRoute: typeof AppAiRoute
+  AppAssignmentsRoute: typeof AppAssignmentsRoute
+  AppAuditRoute: typeof AppAuditRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppJobsRoute: typeof AppJobsRouteWithChildren
+  AppSettingsRoute: typeof AppSettingsRoute
+  AppUsersRoute: typeof AppUsersRoute
+  AppVendorsRoute: typeof AppVendorsRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAiRoute: AppAiRoute,
+  AppAssignmentsRoute: AppAssignmentsRoute,
+  AppAuditRoute: AppAuditRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppJobsRoute: AppJobsRouteWithChildren,
+  AppSettingsRoute: AppSettingsRoute,
+  AppUsersRoute: AppUsersRoute,
+  AppVendorsRoute: AppVendorsRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

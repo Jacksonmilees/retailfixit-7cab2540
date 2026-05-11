@@ -26,7 +26,7 @@ import {
 import { useAuth } from "@/lib/auth/context";
 
 const main = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Jobs", url: "/jobs", icon: ClipboardList },
   { title: "Vendors", url: "/vendors", icon: Building2 },
   { title: "Assignments", url: "/assignments", icon: ShieldCheck },
