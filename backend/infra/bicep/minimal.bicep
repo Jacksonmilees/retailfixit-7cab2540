@@ -24,8 +24,8 @@ module acr 'br/public:avm/res/container-registry/registry:0.1.1' = {
     tags: {
       Environment: environment
     }
-    skuName: 'Basic'
-    adminUserEnabled: true
+    acrSku: 'Basic'
+    acrAdminUserEnabled: true
   }
 }
 
