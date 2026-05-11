@@ -10,9 +10,9 @@ resource signalR 'Microsoft.SignalRService/signalR@2023-08-01-preview' = {
     Environment: environment
   }
   sku: {
-    name: environment == 'prod' ? 'Standard_S1' : 'Free_F1'
-    tier: environment == 'prod' ? 'Standard' : 'Free'
-    capacity: environment == 'prod' ? 1 : 1
+    name: 'Standard_S1'
+    tier: 'Standard'
+    capacity: 1
   }
   kind: 'SignalR'
   properties: {
