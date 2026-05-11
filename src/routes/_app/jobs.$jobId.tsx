@@ -296,20 +296,34 @@ function JobDetail() {
                 <InlineLoader label="Loading timeline" />
               ) : (
                 <ol className="relative space-y-4 ml-2 before:absolute before:left-[5px] before:top-2 before:bottom-2 before:w-px before:bg-border">
-                  {jobAudit.slice(0, 12).map((a) => (
-                    <li key={a.id} className="flex gap-4 text-[13px] relative">
-                      <div className="mt-1.5 h-2.5 w-2.5 rounded-full bg-primary shrink-0 ring-4 ring-background z-10" />
-                      <div className="flex-1">
-                        <div className="text-foreground">
-                          <span className="font-medium">{a.action}</span> by{" "}
-                          <span className="text-muted-foreground">{a.actor}</span>
+                  {jobAudit.slice(0, 20).map((a) => {
+                    const dot =
+                      a.action.startsWith("ai.") ? "bg-primary" :
+                      a.action.includes("assigned") ? "bg-success" :
+                      a.action.includes("completed") ? "bg-success" :
+                      a.action.includes("created") ? "bg-foreground/60" :
+                      "bg-muted-foreground";
+                    return (
+                      <li key={a.id} className="flex gap-4 text-[13px] relative">
+                        <div className={`mt-1.5 h-2.5 w-2.5 rounded-full ${dot} shrink-0 ring-4 ring-background z-10`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <span className="font-mono text-[12px] text-foreground">{a.action}</span>
+                            <Badge variant={a.actorRole === "ai" ? "default" : "secondary"} className="text-[9px] uppercase">{a.actorRole ?? "system"}</Badge>
+                            <span className="text-[11px] text-muted-foreground">by {a.actor}</span>
+                          </div>
+                          <div className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-2 flex-wrap">
+                            <TimeAgo iso={a.createdAt} />
+                            {a.correlationId && <span className="font-mono">cor: {a.correlationId}</span>}
+                            {a.traceId && <span className="font-mono truncate max-w-[180px]" title={a.traceId}>trace: {a.traceId.slice(3, 19)}…</span>}
+                          </div>
+                          {a.metadata && Object.keys(a.metadata).length > 0 && (
+                            <pre className="mt-1.5 p-2 rounded-md bg-bg-secondary/60 text-[10px] font-mono text-muted-foreground overflow-x-auto">{JSON.stringify(a.metadata, null, 0)}</pre>
+                          )}
                         </div>
-                        <div className="text-[11px] text-muted-foreground mt-0.5">
-                          <TimeAgo iso={a.createdAt} />
-                        </div>
-                      </div>
-                    </li>
-                  ))}
+                      </li>
+                    );
+                  })}
                   {!jobAudit.length && (
                     <li className="text-[12px] text-muted-foreground ml-6">
                       No events recorded for this job yet.
