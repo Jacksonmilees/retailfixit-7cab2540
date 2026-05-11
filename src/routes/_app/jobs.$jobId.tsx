@@ -41,7 +41,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -488,9 +488,9 @@ function formatDispatchDuration(startIso: string, endIso?: string) {
 
 function VendorPopover({ vendor, children }: { vendor: Vendor; children: React.ReactNode }) {
   return (
-    <HoverCard openDelay={120}>
-      <HoverCardTrigger asChild>{children}</HoverCardTrigger>
-      <HoverCardContent className="w-80 rounded-xl border-border/60 shadow-float" side="top">
+    <Popover>
+      <PopoverTrigger asChild>{children}</PopoverTrigger>
+      <PopoverContent className="w-80 rounded-xl border-border/60 shadow-float" side="top">
         <div className="space-y-3">
           <div className="flex items-center gap-3">
             <div className="h-11 w-11 rounded-xl bg-brand text-primary-foreground flex items-center justify-center text-[13px] font-semibold shadow-pop">
@@ -545,8 +545,8 @@ function VendorPopover({ vendor, children }: { vendor: Vendor; children: React.R
             Open vendor profile <ExternalLink className="h-3 w-3" />
           </Link>
         </div>
-      </HoverCardContent>
-    </HoverCard>
+      </PopoverContent>
+    </Popover>
   );
 }
 
