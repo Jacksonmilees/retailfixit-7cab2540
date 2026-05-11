@@ -6,15 +6,40 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { StatusBadge, PriorityBadge, RiskBadge, TimeAgo } from "@/components/common/badges";
 import {
-  Sparkles, ChevronLeft, MapPin, Phone, User, Wand2, AlertCircle, CheckCircle2,
-  Clock, Star, FileDown, ExternalLink, Send, Search, ShieldCheck, Timer,
+  Sparkles,
+  ChevronLeft,
+  MapPin,
+  Phone,
+  User,
+  Wand2,
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  Star,
+  FileDown,
+  ExternalLink,
+  Send,
+  Search,
+  ShieldCheck,
+  Timer,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger,
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
 } from "@/components/ui/sheet";
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { Textarea } from "@/components/ui/textarea";
@@ -38,13 +63,23 @@ function JobDetail() {
   const qc = useQueryClient();
   const job = useQuery({ queryKey: ["job", jobId], queryFn: () => api.getJob(jobId) });
   const rec = useQuery({ queryKey: ["rec", jobId], queryFn: () => api.getRecommendation(jobId) });
-  const vendors = useQuery({ queryKey: ["vendors-all"], queryFn: () => api.listVendors({ pageSize: 100 }) });
-  const assignments = useQuery({ queryKey: ["assignments-job", jobId], queryFn: () => api.listAssignments({ pageSize: 100 }) });
+  const vendors = useQuery({
+    queryKey: ["vendors-all"],
+    queryFn: () => api.listVendors({ pageSize: 100 }),
+  });
+  const assignments = useQuery({
+    queryKey: ["assignments-job", jobId],
+    queryFn: () => api.listAssignments({ pageSize: 100 }),
+  });
   const users = useQuery({ queryKey: ["users"], queryFn: () => api.listUsers() });
-  const audit = useQuery({ queryKey: ["audit-job", jobId], queryFn: () => api.listAudit({ pageSize: 50 }) });
+  const audit = useQuery({
+    queryKey: ["audit-job", jobId],
+    queryFn: () => api.listAudit({ pageSize: 50 }),
+  });
 
   useRealtime(["job.updated", "job.assigned", "ai.recommendation.ready"], (e) => {
-    const id = (e.payload as { jobId?: string; id?: string }).jobId ?? (e.payload as { id?: string }).id;
+    const id =
+      (e.payload as { jobId?: string; id?: string }).jobId ?? (e.payload as { id?: string }).id;
     if (id === jobId) {
       qc.invalidateQueries({ queryKey: ["job", jobId] });
       qc.invalidateQueries({ queryKey: ["rec", jobId] });
@@ -55,8 +90,12 @@ function JobDetail() {
   if (job.isLoading || !job.data) return <DetailSkeleton />;
   const j = job.data;
   const assigned = vendors.data?.items.find((v) => v.id === j.assignedVendorId);
-  const currentAssignment = assignments.data?.items.find((a) => a.jobId === jobId && a.vendorId === j.assignedVendorId);
-  const assignedBy = currentAssignment ? assignmentActor(currentAssignment, users.data ?? []) : "Not assigned";
+  const currentAssignment = assignments.data?.items.find(
+    (a) => a.jobId === jobId && a.vendorId === j.assignedVendorId,
+  );
+  const assignedBy = currentAssignment
+    ? assignmentActor(currentAssignment, users.data ?? [])
+    : "Not assigned";
   const jobAudit = audit.data?.items.filter((a) => a.entityId === jobId) ?? [];
 
   function exportPdf() {
@@ -69,13 +108,23 @@ function JobDetail() {
       {/* Top bar */}
       <div className="flex items-center justify-between gap-2">
         <Button variant="ghost" size="sm" asChild className="-ml-2 h-8 rounded-lg">
-          <Link to="/jobs"><ChevronLeft className="h-4 w-4 mr-1" />All jobs</Link>
+          <Link to="/jobs">
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            All jobs
+          </Link>
         </Button>
         <div className="hidden md:flex items-center gap-2">
           <Button size="sm" variant="outline" className="rounded-lg" onClick={exportPdf}>
-            <FileDown className="h-3.5 w-3.5 mr-1.5" />PDF report
+            <FileDown className="h-3.5 w-3.5 mr-1.5" />
+            PDF report
           </Button>
-          <DispatchSheet job={j} rec={rec.data} vendors={vendors.data?.items ?? []} qc={qc} jobId={jobId}>
+          <DispatchSheet
+            job={j}
+            rec={rec.data}
+            vendors={vendors.data?.items ?? []}
+            qc={qc}
+            jobId={jobId}
+          >
             <Button size="sm" className="rounded-lg shadow-pop">
               <Send className="h-3.5 w-3.5 mr-1.5" />
               {assigned ? "Reassign vendor" : "Dispatch vendor"}
@@ -90,7 +139,9 @@ function JobDetail() {
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">{j.reference}</div>
+              <div className="text-[11px] font-mono uppercase tracking-wider text-muted-foreground">
+                {j.reference}
+              </div>
               <CardTitle className="text-[20px] md:text-[22px] font-semibold tracking-tight mt-1 leading-tight break-words">
                 {j.title}
               </CardTitle>
@@ -117,15 +168,27 @@ function JobDetail() {
           </div>
 
           {/* Dispatch panel — always visible */}
-          <div className={`rounded-xl border p-4 ${assigned ? "border-success/30 bg-success/5" : "border-warning/40 bg-warning/5"}`}>
+          <div
+            className={`rounded-xl border p-4 ${assigned ? "border-success/30 bg-success/5" : "border-warning/40 bg-warning/5"}`}
+          >
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-2 text-[11px] uppercase tracking-wider">
-                {assigned ? <ShieldCheck className="h-3.5 w-3.5 text-success" /> : <AlertCircle className="h-3.5 w-3.5 text-warning" />}
+                {assigned ? (
+                  <ShieldCheck className="h-3.5 w-3.5 text-success" />
+                ) : (
+                  <AlertCircle className="h-3.5 w-3.5 text-warning" />
+                )}
                 <span className={assigned ? "text-success" : "text-warning"}>
                   {assigned ? "Vendor assigned" : "Awaiting dispatch"}
                 </span>
               </div>
-              <DispatchSheet job={j} rec={rec.data} vendors={vendors.data?.items ?? []} qc={qc} jobId={jobId}>
+              <DispatchSheet
+                job={j}
+                rec={rec.data}
+                vendors={vendors.data?.items ?? []}
+                qc={qc}
+                jobId={jobId}
+              >
                 <Button size="sm" className="rounded-lg h-8">
                   <Send className="h-3.5 w-3.5 mr-1.5" />
                   {assigned ? "Reassign" : "Dispatch"}
@@ -137,11 +200,20 @@ function JobDetail() {
                 <VendorPopover vendor={assigned}>
                   <button className="flex items-center gap-3 w-full text-left group">
                     <div className="h-10 w-10 rounded-xl bg-brand text-primary-foreground flex items-center justify-center text-[12px] font-semibold shadow-pop">
-                      {assigned.name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
+                      {assigned.name
+                        .split(" ")
+                        .map((w) => w[0])
+                        .slice(0, 2)
+                        .join("")}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <div className="text-[13px] font-medium group-hover:text-primary transition-colors truncate">{assigned.name}</div>
-                      <div className="text-[11px] text-muted-foreground truncate">★ {assigned.rating} · {assigned.activeJobs}/{assigned.capacity} active · {assigned.avgResponseMinutes}m avg</div>
+                      <div className="text-[13px] font-medium group-hover:text-primary transition-colors truncate">
+                        {assigned.name}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground truncate">
+                        ★ {assigned.rating} · {assigned.activeJobs}/{assigned.capacity} active ·{" "}
+                        {assigned.avgResponseMinutes}m avg
+                      </div>
                     </div>
                     <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
                   </button>
@@ -155,7 +227,9 @@ function JobDetail() {
             <div className="rounded-xl border border-border/60 bg-bg-secondary/60 p-4">
               <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                 <span className="uppercase tracking-wider">AI complexity score</span>
-                <span className="tabular-nums text-foreground font-medium">{j.complexityScore}/100</span>
+                <span className="tabular-nums text-foreground font-medium">
+                  {j.complexityScore}/100
+                </span>
               </div>
               <Progress value={j.complexityScore} className="mt-2 h-1.5" />
             </div>
@@ -172,7 +246,8 @@ function JobDetail() {
             </CardTitle>
             {rec.data && (
               <span className="text-[10px] text-muted-foreground tabular-nums">
-                {rec.data.modelVersion} · {(rec.data.confidence * 100).toFixed(0)}% conf · {rec.data.latencyMs}ms
+                {rec.data.modelVersion} · {(rec.data.confidence * 100).toFixed(0)}% conf ·{" "}
+                {rec.data.latencyMs}ms
               </span>
             )}
           </div>
@@ -180,7 +255,9 @@ function JobDetail() {
         <CardContent className="space-y-3">
           {rec.isLoading ? (
             <div className="space-y-2">
-              {Array.from({ length: 2 }).map((_, i) => <div key={i} className="h-16 rounded-lg skeleton-shimmer" />)}
+              {Array.from({ length: 2 }).map((_, i) => (
+                <div key={i} className="h-16 rounded-lg skeleton-shimmer" />
+              ))}
             </div>
           ) : rec.data ? (
             <RecPreview rec={rec.data} vendors={vendors.data?.items ?? []} jobId={jobId} qc={qc} />
@@ -195,24 +272,39 @@ function JobDetail() {
         <CardContent className="p-0">
           <Tabs defaultValue="timeline">
             <TabsList className="m-3 bg-bg-secondary">
-              <TabsTrigger value="timeline" className="text-[12px]">Timeline</TabsTrigger>
-              <TabsTrigger value="summary" className="text-[12px]">AI summary</TabsTrigger>
-              <TabsTrigger value="meta" className="text-[12px]">Details</TabsTrigger>
+              <TabsTrigger value="timeline" className="text-[12px]">
+                Timeline
+              </TabsTrigger>
+              <TabsTrigger value="summary" className="text-[12px]">
+                AI summary
+              </TabsTrigger>
+              <TabsTrigger value="meta" className="text-[12px]">
+                Details
+              </TabsTrigger>
             </TabsList>
             <TabsContent value="timeline" className="p-5 pt-2">
-              {audit.isLoading ? <InlineLoader label="Loading timeline" /> : (
+              {audit.isLoading ? (
+                <InlineLoader label="Loading timeline" />
+              ) : (
                 <ol className="relative space-y-4 ml-2 before:absolute before:left-[5px] before:top-2 before:bottom-2 before:w-px before:bg-border">
                   {jobAudit.slice(0, 12).map((a) => (
                     <li key={a.id} className="flex gap-4 text-[13px] relative">
                       <div className="mt-1.5 h-2.5 w-2.5 rounded-full bg-primary shrink-0 ring-4 ring-background z-10" />
                       <div className="flex-1">
-                        <div className="text-foreground"><span className="font-medium">{a.action}</span> by <span className="text-muted-foreground">{a.actor}</span></div>
-                        <div className="text-[11px] text-muted-foreground mt-0.5"><TimeAgo iso={a.createdAt} /></div>
+                        <div className="text-foreground">
+                          <span className="font-medium">{a.action}</span> by{" "}
+                          <span className="text-muted-foreground">{a.actor}</span>
+                        </div>
+                        <div className="text-[11px] text-muted-foreground mt-0.5">
+                          <TimeAgo iso={a.createdAt} />
+                        </div>
                       </div>
                     </li>
                   ))}
                   {!jobAudit.length && (
-                    <li className="text-[12px] text-muted-foreground ml-6">No events recorded for this job yet.</li>
+                    <li className="text-[12px] text-muted-foreground ml-6">
+                      No events recorded for this job yet.
+                    </li>
                   )}
                 </ol>
               )}
@@ -229,7 +321,9 @@ function JobDetail() {
                 <Meta label="Created" value={new Date(j.createdAt).toLocaleString()} />
                 <Meta label="Updated" value={new Date(j.updatedAt).toLocaleString()} />
                 <Meta label="SLA due" value={new Date(j.slaDueAt).toLocaleString()} />
-                {j.assignedAt && <Meta label="Assigned" value={new Date(j.assignedAt).toLocaleString()} />}
+                {j.assignedAt && (
+                  <Meta label="Assigned" value={new Date(j.assignedAt).toLocaleString()} />
+                )}
               </div>
             </TabsContent>
           </Tabs>
@@ -239,9 +333,16 @@ function JobDetail() {
       {/* Mobile sticky action bar */}
       <div className="md:hidden fixed bottom-0 inset-x-0 z-30 bg-background/90 backdrop-blur border-t border-border/60 px-4 py-3 flex gap-2">
         <Button size="sm" variant="outline" className="rounded-lg flex-1" onClick={exportPdf}>
-          <FileDown className="h-3.5 w-3.5 mr-1.5" />PDF
+          <FileDown className="h-3.5 w-3.5 mr-1.5" />
+          PDF
         </Button>
-        <DispatchSheet job={j} rec={rec.data} vendors={vendors.data?.items ?? []} qc={qc} jobId={jobId}>
+        <DispatchSheet
+          job={j}
+          rec={rec.data}
+          vendors={vendors.data?.items ?? []}
+          qc={qc}
+          jobId={jobId}
+        >
           <Button size="sm" className="rounded-lg flex-[2] shadow-pop">
             <Send className="h-3.5 w-3.5 mr-1.5" />
             {assigned ? "Reassign vendor" : "Dispatch vendor"}
@@ -252,10 +353,20 @@ function JobDetail() {
   );
 }
 
-function Field({ icon: Icon, label, value }: { icon: React.ComponentType<{ className?: string }>; label: string; value: string }) {
+function Field({
+  icon: Icon,
+  label,
+  value,
+}: {
+  icon: React.ComponentType<{ className?: string }>;
+  label: string;
+  value: string;
+}) {
   return (
     <div className="flex items-start gap-2.5 text-[13px]">
-      <div className="h-8 w-8 rounded-lg bg-bg-tertiary text-muted-foreground flex items-center justify-center shrink-0"><Icon className="h-3.5 w-3.5" /></div>
+      <div className="h-8 w-8 rounded-lg bg-bg-tertiary text-muted-foreground flex items-center justify-center shrink-0">
+        <Icon className="h-3.5 w-3.5" />
+      </div>
       <div className="min-w-0">
         <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
         <div className="text-foreground truncate">{value}</div>
@@ -273,7 +384,13 @@ function Meta({ label, value }: { label: string; value: string }) {
   );
 }
 
-function DispatchFacts({ assignment, assignedBy }: { assignment?: Assignment; assignedBy: string }) {
+function DispatchFacts({
+  assignment,
+  assignedBy,
+}: {
+  assignment?: Assignment;
+  assignedBy: string;
+}) {
   if (!assignment) {
     return (
       <div className="rounded-xl border border-border/60 bg-background/70 p-3 text-[12px] text-muted-foreground">
@@ -283,23 +400,59 @@ function DispatchFacts({ assignment, assignedBy }: { assignment?: Assignment; as
   }
   return (
     <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
-      <DispatchFact label="Source" value={assignment.assignedBy === "ai" ? "AI dispatch" : "Human dispatch"} icon={assignment.assignedBy === "ai" ? Sparkles : User} />
+      <DispatchFact
+        label="Source"
+        value={assignment.assignedBy === "ai" ? "AI dispatch" : "Human dispatch"}
+        icon={assignment.assignedBy === "ai" ? Sparkles : User}
+      />
       <DispatchFact label="Vendor status" value={assignment.status} icon={CheckCircle2} />
       <DispatchFact label="Assigned by" value={assignedBy} icon={ShieldCheck} />
-      <DispatchFact label="Elapsed" value={formatDispatchDuration(assignment.assignedAt, assignment.completedAt ?? assignment.acceptedAt)} icon={Timer} />
-      <DispatchFact label="Assigned" value={formatDispatchDate(assignment.assignedAt)} icon={Clock} />
-      <DispatchFact label="Accepted" value={assignment.acceptedAt ? formatDispatchDate(assignment.acceptedAt) : "Waiting"} icon={CheckCircle2} />
-      <DispatchFact label="Completed" value={assignment.completedAt ? formatDispatchDate(assignment.completedAt) : "—"} icon={ShieldCheck} />
+      <DispatchFact
+        label="Elapsed"
+        value={formatDispatchDuration(
+          assignment.assignedAt,
+          assignment.completedAt ?? assignment.acceptedAt,
+        )}
+        icon={Timer}
+      />
+      <DispatchFact
+        label="Assigned"
+        value={formatDispatchDate(assignment.assignedAt)}
+        icon={Clock}
+      />
+      <DispatchFact
+        label="Accepted"
+        value={assignment.acceptedAt ? formatDispatchDate(assignment.acceptedAt) : "Waiting"}
+        icon={CheckCircle2}
+      />
+      <DispatchFact
+        label="Completed"
+        value={assignment.completedAt ? formatDispatchDate(assignment.completedAt) : "—"}
+        icon={ShieldCheck}
+      />
       <DispatchFact label="Notes" value={assignment.notes ?? "No notes"} icon={AlertCircle} />
     </div>
   );
 }
 
-function DispatchFact({ label, value, icon: Icon }: { label: string; value: string; icon: React.ComponentType<{ className?: string }> }) {
+function DispatchFact({
+  label,
+  value,
+  icon: Icon,
+}: {
+  label: string;
+  value: string;
+  icon: React.ComponentType<{ className?: string }>;
+}) {
   return (
     <div className="min-w-0 rounded-xl bg-background/70 p-3 ring-1 ring-border/60">
-      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground"><Icon className="h-3 w-3" />{label}</div>
-      <div className="mt-1 truncate text-[12px] font-medium capitalize text-foreground">{value}</div>
+      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground">
+        <Icon className="h-3 w-3" />
+        {label}
+      </div>
+      <div className="mt-1 truncate text-[12px] font-medium capitalize text-foreground">
+        {value}
+      </div>
     </div>
   );
 }
@@ -310,11 +463,21 @@ function assignmentActor(assignment: Assignment, users: { id: string; name: stri
 }
 
 function formatDispatchDate(iso: string) {
-  return new Date(iso).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+  return new Date(iso).toLocaleString([], {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
 }
 
 function formatDispatchDuration(startIso: string, endIso?: string) {
-  const minutes = Math.max(0, Math.round(((endIso ? new Date(endIso).getTime() : Date.now()) - new Date(startIso).getTime()) / 60000));
+  const minutes = Math.max(
+    0,
+    Math.round(
+      ((endIso ? new Date(endIso).getTime() : Date.now()) - new Date(startIso).getTime()) / 60000,
+    ),
+  );
   if (minutes < 60) return `${minutes}m`;
   const hours = Math.floor(minutes / 60);
   const remaining = minutes % 60;
@@ -331,25 +494,56 @@ function VendorPopover({ vendor, children }: { vendor: Vendor; children: React.R
         <div className="space-y-3">
           <div className="flex items-center gap-3">
             <div className="h-11 w-11 rounded-xl bg-brand text-primary-foreground flex items-center justify-center text-[13px] font-semibold shadow-pop">
-              {vendor.name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
+              {vendor.name
+                .split(" ")
+                .map((w) => w[0])
+                .slice(0, 2)
+                .join("")}
             </div>
             <div>
               <div className="text-[14px] font-semibold">{vendor.name}</div>
-              <div className="flex items-center gap-1 text-warning text-[12px]"><Star className="h-3 w-3 fill-warning" /><span className="text-foreground tabular-nums">{vendor.rating}</span> <span className="text-muted-foreground">· {vendor.completedJobs} done</span></div>
+              <div className="flex items-center gap-1 text-warning text-[12px]">
+                <Star className="h-3 w-3 fill-warning" />
+                <span className="text-foreground tabular-nums">{vendor.rating}</span>{" "}
+                <span className="text-muted-foreground">· {vendor.completedJobs} done</span>
+              </div>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-2 text-[11px]">
-            <div className="rounded-lg bg-bg-secondary p-2"><div className="text-muted-foreground">Capacity</div><div className="font-medium text-foreground">{vendor.activeJobs}/{vendor.capacity}</div></div>
-            <div className="rounded-lg bg-bg-secondary p-2"><div className="text-muted-foreground">Avg response</div><div className="font-medium text-foreground">{vendor.avgResponseMinutes}m</div></div>
+            <div className="rounded-lg bg-bg-secondary p-2">
+              <div className="text-muted-foreground">Capacity</div>
+              <div className="font-medium text-foreground">
+                {vendor.activeJobs}/{vendor.capacity}
+              </div>
+            </div>
+            <div className="rounded-lg bg-bg-secondary p-2">
+              <div className="text-muted-foreground">Avg response</div>
+              <div className="font-medium text-foreground">{vendor.avgResponseMinutes}m</div>
+            </div>
           </div>
           <div>
-            <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">Categories</div>
-            <div className="flex flex-wrap gap-1">{vendor.categories.map(c => <Badge key={c} variant="secondary" className="text-[10px]">{c}</Badge>)}</div>
+            <div className="text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
+              Categories
+            </div>
+            <div className="flex flex-wrap gap-1">
+              {vendor.categories.map((c) => (
+                <Badge key={c} variant="secondary" className="text-[10px]">
+                  {c}
+                </Badge>
+              ))}
+            </div>
           </div>
           <div className="flex items-center gap-2 text-[11px] text-muted-foreground border-t border-border/60 pt-2">
-            <Phone className="h-3 w-3" />{vendor.phone}
+            <Phone className="h-3 w-3" />
+            {vendor.phone}
           </div>
-          <Link to="/vendors/$vendorId" params={{ vendorId: vendor.id }} className="text-[12px] text-primary hover:underline inline-flex items-center gap-1">Open vendor profile <ExternalLink className="h-3 w-3" /></Link>
+          <Link
+            to="/vendors/$vendorId"
+            params={{ vendorId: vendor.id }}
+            className="text-[12px] text-primary hover:underline inline-flex items-center gap-1"
+          >
+            Open vendor profile <ExternalLink className="h-3 w-3" />
+          </Link>
         </div>
       </HoverCardContent>
     </HoverCard>
@@ -359,48 +553,88 @@ function VendorPopover({ vendor, children }: { vendor: Vendor; children: React.R
 function RequestRec({ jobId, qc }: { jobId: string; qc: ReturnType<typeof useQueryClient> }) {
   const m = useMutation({
     mutationFn: () => api.requestRecommendation(jobId),
-    onSuccess: () => { toast.success("AI recommendation generated"); qc.invalidateQueries({ queryKey: ["rec", jobId] }); },
+    onSuccess: () => {
+      toast.success("AI recommendation generated");
+      qc.invalidateQueries({ queryKey: ["rec", jobId] });
+    },
     onError: () => toast.error("AI request failed — fallback used"),
   });
   return (
     <div className="rounded-xl border border-dashed border-border p-5 text-center">
       <Sparkles className="h-5 w-5 text-primary mx-auto mb-2" />
       <div className="text-[13px] font-medium">No recommendation yet</div>
-      <div className="text-[11px] text-muted-foreground mt-0.5">Ask Azure OpenAI to rank vendor candidates for this job.</div>
-      <Button size="sm" className="rounded-lg mt-3" onClick={() => m.mutate()} disabled={m.isPending}>
-        {m.isPending ? <FluentSpinner size={14} className="mr-2 text-primary-foreground" /> : <Wand2 className="h-3.5 w-3.5 mr-1.5" />}
+      <div className="text-[11px] text-muted-foreground mt-0.5">
+        Ask Azure OpenAI to rank vendor candidates for this job.
+      </div>
+      <Button
+        size="sm"
+        className="rounded-lg mt-3"
+        onClick={() => m.mutate()}
+        disabled={m.isPending}
+      >
+        {m.isPending ? (
+          <FluentSpinner size={14} className="mr-2 text-primary-foreground" />
+        ) : (
+          <Wand2 className="h-3.5 w-3.5 mr-1.5" />
+        )}
         {m.isPending ? "Requesting" : "Request recommendation"}
       </Button>
     </div>
   );
 }
 
-function RecPreview({ rec, vendors, jobId, qc }: { rec: AIRecommendation; vendors: Vendor[]; jobId: string; qc: ReturnType<typeof useQueryClient> }) {
+function RecPreview({
+  rec,
+  vendors,
+  jobId,
+  qc,
+}: {
+  rec: AIRecommendation;
+  vendors: Vendor[];
+  jobId: string;
+  qc: ReturnType<typeof useQueryClient>;
+}) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between text-[11px] text-muted-foreground">
         <span className="flex items-center gap-1.5">
-          {rec.fallbackUsed ? <AlertCircle className="h-3.5 w-3.5 text-warning" /> : <CheckCircle2 className="h-3.5 w-3.5 text-success" />}
+          {rec.fallbackUsed ? (
+            <AlertCircle className="h-3.5 w-3.5 text-warning" />
+          ) : (
+            <CheckCircle2 className="h-3.5 w-3.5 text-success" />
+          )}
           {rec.fallbackUsed ? "Fallback used" : "Live model"}
         </span>
-        <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{rec.latencyMs}ms</span>
+        <span className="flex items-center gap-1">
+          <Clock className="h-3 w-3" />
+          {rec.latencyMs}ms
+        </span>
       </div>
       {rec.candidates.slice(0, 3).map((c, i) => {
         const v = vendors.find((x) => x.id === c.vendorId);
         return (
-          <div key={c.vendorId} className="flex items-center gap-3 rounded-lg border border-border/60 p-2.5">
-            <span className="text-[10px] font-mono text-muted-foreground w-6 shrink-0">#{i + 1}</span>
+          <div
+            key={c.vendorId}
+            className="flex items-center gap-3 rounded-lg border border-border/60 p-2.5"
+          >
+            <span className="text-[10px] font-mono text-muted-foreground w-6 shrink-0">
+              #{i + 1}
+            </span>
             <div className="flex-1 min-w-0">
               {v ? (
                 <VendorPopover vendor={v}>
-                  <button className="text-[13px] font-medium hover:text-primary block truncate text-left w-full">{v.name}</button>
+                  <button className="text-[13px] font-medium hover:text-primary block truncate text-left w-full">
+                    {v.name}
+                  </button>
                 </VendorPopover>
               ) : (
                 <span className="text-[13px] font-medium truncate">{c.vendorId}</span>
               )}
               <p className="text-[11px] text-muted-foreground line-clamp-1">{c.reasoning}</p>
             </div>
-            <span className="text-[12px] tabular-nums text-primary font-semibold shrink-0">{(c.score * 100).toFixed(0)}%</span>
+            <span className="text-[12px] tabular-nums text-primary font-semibold shrink-0">
+              {(c.score * 100).toFixed(0)}%
+            </span>
           </div>
         );
       })}
@@ -413,7 +647,8 @@ function RecPreview({ rec, vendors, jobId, qc }: { rec: AIRecommendation; vendor
         defaultTab="ai"
       >
         <Button size="sm" variant="outline" className="w-full rounded-lg mt-2">
-          <Send className="h-3.5 w-3.5 mr-1.5" />Open dispatch panel
+          <Send className="h-3.5 w-3.5 mr-1.5" />
+          Open dispatch panel
         </Button>
       </DispatchSheet>
     </div>
@@ -421,7 +656,12 @@ function RecPreview({ rec, vendors, jobId, qc }: { rec: AIRecommendation; vendor
 }
 
 function DispatchSheet({
-  rec, vendors, jobId, qc, children, defaultTab,
+  rec,
+  vendors,
+  jobId,
+  qc,
+  children,
+  defaultTab,
 }: {
   job?: unknown;
   rec?: AIRecommendation | null | undefined;
@@ -447,8 +687,11 @@ function DispatchSheet({
     },
   });
 
-  const filtered = vendors.filter((v) =>
-    !search || v.name.toLowerCase().includes(search.toLowerCase()) || v.categories.some(c => c.toLowerCase().includes(search.toLowerCase()))
+  const filtered = vendors.filter(
+    (v) =>
+      !search ||
+      v.name.toLowerCase().includes(search.toLowerCase()) ||
+      v.categories.some((c) => c.toLowerCase().includes(search.toLowerCase())),
   );
 
   return (
@@ -457,13 +700,23 @@ function DispatchSheet({
       <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col">
         <SheetHeader className="px-5 pt-5 pb-3 border-b border-border/60">
           <SheetTitle className="text-[16px]">Dispatch vendor</SheetTitle>
-          <SheetDescription className="text-[12px]">Pick the AI-recommended vendor or manually assign one.</SheetDescription>
+          <SheetDescription className="text-[12px]">
+            Pick the AI-recommended vendor or manually assign one.
+          </SheetDescription>
         </SheetHeader>
 
-        <Tabs value={tab} onValueChange={(v) => setTab(v as "ai" | "manual")} className="flex-1 flex flex-col min-h-0">
+        <Tabs
+          value={tab}
+          onValueChange={(v) => setTab(v as "ai" | "manual")}
+          className="flex-1 flex flex-col min-h-0"
+        >
           <TabsList className="mx-5 mt-3 bg-bg-secondary">
-            <TabsTrigger value="ai" className="text-[12px] flex-1">AI recommendation</TabsTrigger>
-            <TabsTrigger value="manual" className="text-[12px] flex-1">Manual</TabsTrigger>
+            <TabsTrigger value="ai" className="text-[12px] flex-1">
+              AI recommendation
+            </TabsTrigger>
+            <TabsTrigger value="manual" className="text-[12px] flex-1">
+              Manual
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="ai" className="flex-1 overflow-y-auto px-5 py-4 space-y-3 mt-0">
@@ -471,33 +724,62 @@ function DispatchSheet({
               <>
                 <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                   <span className="flex items-center gap-1.5">
-                    {rec.fallbackUsed ? <AlertCircle className="h-3.5 w-3.5 text-warning" /> : <CheckCircle2 className="h-3.5 w-3.5 text-success" />}
+                    {rec.fallbackUsed ? (
+                      <AlertCircle className="h-3.5 w-3.5 text-warning" />
+                    ) : (
+                      <CheckCircle2 className="h-3.5 w-3.5 text-success" />
+                    )}
                     {rec.modelVersion}
                   </span>
-                  <span>{(rec.confidence * 100).toFixed(0)}% conf · {rec.latencyMs}ms</span>
+                  <span>
+                    {(rec.confidence * 100).toFixed(0)}% conf · {rec.latencyMs}ms
+                  </span>
                 </div>
                 {rec.candidates.map((c, i) => {
                   const v = vendors.find((x) => x.id === c.vendorId);
                   return (
-                    <div key={c.vendorId} className="rounded-xl border border-border/60 p-3 hover:shadow-card transition-shadow">
+                    <div
+                      key={c.vendorId}
+                      className="rounded-xl border border-border/60 p-3 hover:shadow-card transition-shadow"
+                    >
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-[10px] font-mono text-muted-foreground">#{i + 1}</span>
-                          <span className="text-[13px] font-medium truncate">{v?.name ?? c.vendorId}</span>
+                          <span className="text-[10px] font-mono text-muted-foreground">
+                            #{i + 1}
+                          </span>
+                          <span className="text-[13px] font-medium truncate">
+                            {v?.name ?? c.vendorId}
+                          </span>
                         </div>
-                        <span className="text-[11px] tabular-nums text-primary font-semibold">{(c.score * 100).toFixed(0)}%</span>
+                        <span className="text-[11px] tabular-nums text-primary font-semibold">
+                          {(c.score * 100).toFixed(0)}%
+                        </span>
                       </div>
-                      <p className="mt-1.5 text-[11px] text-muted-foreground leading-relaxed">{c.reasoning}</p>
+                      <p className="mt-1.5 text-[11px] text-muted-foreground leading-relaxed">
+                        {c.reasoning}
+                      </p>
                       {v && (
                         <div className="mt-2 text-[10px] text-muted-foreground">
-                          ★ {v.rating} · {v.activeJobs}/{v.capacity} active · {v.avgResponseMinutes}m avg
+                          ★ {v.rating} · {v.activeJobs}/{v.capacity} active · {v.avgResponseMinutes}
+                          m avg
                         </div>
                       )}
                       <div className="mt-2.5 flex gap-2">
-                        <Button size="sm" className="h-7 rounded-md text-[11px] flex-1" onClick={() => assignMut.mutate({ vendorId: c.vendorId })} disabled={assignMut.isPending}>
-                          {assignMut.isPending ? <FluentSpinner size={12} className="text-primary-foreground" /> : "Accept AI"}
+                        <Button
+                          size="sm"
+                          className="h-7 rounded-md text-[11px] flex-1"
+                          onClick={() => assignMut.mutate({ vendorId: c.vendorId })}
+                          disabled={assignMut.isPending}
+                        >
+                          {assignMut.isPending ? (
+                            <FluentSpinner size={12} className="text-primary-foreground" />
+                          ) : (
+                            "Accept AI"
+                          )}
                         </Button>
-                        <OverrideButton onConfirm={(reason) => assignMut.mutate({ vendorId: c.vendorId, reason })} />
+                        <OverrideButton
+                          onConfirm={(reason) => assignMut.mutate({ vendorId: c.vendorId, reason })}
+                        />
                       </div>
                     </div>
                   );
@@ -511,7 +793,12 @@ function DispatchSheet({
           <TabsContent value="manual" className="flex-1 overflow-y-auto px-5 py-4 space-y-2 mt-0">
             <div className="relative">
               <Search className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search vendor or category…" className="pl-8 rounded-lg" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search vendor or category…"
+                className="pl-8 rounded-lg"
+              />
             </div>
             {filtered.map((v) => (
               <button
@@ -523,18 +810,29 @@ function DispatchSheet({
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div className="h-9 w-9 rounded-lg bg-bg-tertiary text-foreground flex items-center justify-center text-[11px] font-semibold shrink-0">
-                      {v.name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
+                      {v.name
+                        .split(" ")
+                        .map((w) => w[0])
+                        .slice(0, 2)
+                        .join("")}
                     </div>
                     <div className="min-w-0">
                       <div className="text-[13px] font-medium truncate">{v.name}</div>
-                      <div className="text-[10px] text-muted-foreground truncate">★ {v.rating} · {v.activeJobs}/{v.capacity} · {v.categories.slice(0, 2).join(", ")}</div>
+                      <div className="text-[10px] text-muted-foreground truncate">
+                        ★ {v.rating} · {v.activeJobs}/{v.capacity} ·{" "}
+                        {v.categories.slice(0, 2).join(", ")}
+                      </div>
                     </div>
                   </div>
                   <Send className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
                 </div>
               </button>
             ))}
-            {!filtered.length && <div className="text-center text-[12px] text-muted-foreground py-8">No vendors match.</div>}
+            {!filtered.length && (
+              <div className="text-center text-[12px] text-muted-foreground py-8">
+                No vendors match.
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       </SheetContent>
@@ -547,39 +845,85 @@ function OverrideButton({ onConfirm }: { onConfirm: (reason: string) => void }) 
   const [reason, setReason] = React.useState("");
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild><Button size="sm" variant="outline" className="h-7 rounded-md text-[11px]">Override</Button></DialogTrigger>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="outline" className="h-7 rounded-md text-[11px]">
+          Override
+        </Button>
+      </DialogTrigger>
       <DialogContent className="rounded-2xl">
-        <DialogHeader><DialogTitle>Log override reason</DialogTitle><DialogDescription>Captured for AI evaluation.</DialogDescription></DialogHeader>
-        <Textarea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="e.g. customer prefers vendor X" rows={4} />
+        <DialogHeader>
+          <DialogTitle>Log override reason</DialogTitle>
+          <DialogDescription>Captured for AI evaluation.</DialogDescription>
+        </DialogHeader>
+        <Textarea
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          placeholder="e.g. customer prefers vendor X"
+          rows={4}
+        />
         <DialogFooter>
-          <Button variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
-          <Button onClick={() => { onConfirm(reason); setOpen(false); setReason(""); }}>Assign with override</Button>
+          <Button variant="outline" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>
+          <Button
+            onClick={() => {
+              onConfirm(reason);
+              setOpen(false);
+              setReason("");
+            }}
+          >
+            Assign with override
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
-function AISummary({ jobId, initial, qc }: { jobId: string; initial?: string; qc: ReturnType<typeof useQueryClient> }) {
+function AISummary({
+  jobId,
+  initial,
+  qc,
+}: {
+  jobId: string;
+  initial?: string;
+  qc: ReturnType<typeof useQueryClient>;
+}) {
   const [raw, setRaw] = React.useState("");
   const [out, setOut] = React.useState(initial ?? "");
   const m = useMutation({
     mutationFn: () => api.generateJobSummary(jobId, raw),
-    onSuccess: (s) => { setOut(s); toast.success("Summary generated"); qc.invalidateQueries({ queryKey: ["job", jobId] }); },
+    onSuccess: (s) => {
+      setOut(s);
+      toast.success("Summary generated");
+      qc.invalidateQueries({ queryKey: ["job", jobId] });
+    },
   });
   return (
     <div className="grid lg:grid-cols-2 gap-4">
       <div className="space-y-2">
         <Label className="text-[12px]">Raw customer report</Label>
-        <Textarea rows={8} value={raw} onChange={(e) => setRaw(e.target.value)} placeholder="Paste call notes, emails, or chat transcripts…" className="rounded-lg" />
+        <Textarea
+          rows={8}
+          value={raw}
+          onChange={(e) => setRaw(e.target.value)}
+          placeholder="Paste call notes, emails, or chat transcripts…"
+          className="rounded-lg"
+        />
         <Button onClick={() => m.mutate()} disabled={!raw || m.isPending} className="rounded-lg">
-          {m.isPending ? <FluentSpinner size={14} className="mr-2 text-primary-foreground" /> : <Sparkles className="h-3.5 w-3.5 mr-1.5" />}
+          {m.isPending ? (
+            <FluentSpinner size={14} className="mr-2 text-primary-foreground" />
+          ) : (
+            <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+          )}
           {m.isPending ? "Summarizing" : "Generate summary"}
         </Button>
       </div>
       <div className="space-y-2">
         <Label className="text-[12px]">AI summary</Label>
-        <div className="rounded-xl border border-border/60 bg-bg-secondary p-4 min-h-48 text-[13px] leading-relaxed whitespace-pre-wrap">{out || <span className="text-muted-foreground">Summary will appear here.</span>}</div>
+        <div className="rounded-xl border border-border/60 bg-bg-secondary p-4 min-h-48 text-[13px] leading-relaxed whitespace-pre-wrap">
+          {out || <span className="text-muted-foreground">Summary will appear here.</span>}
+        </div>
       </div>
     </div>
   );
