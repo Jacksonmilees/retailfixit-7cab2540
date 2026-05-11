@@ -284,7 +284,7 @@ function Info({ icon: Icon, label, value }: { icon: React.ComponentType<{ classN
   );
 }
 
-function actorLabel(assignment: Assignment, users: Map<string, { name: string }>) {
+function actorLabel(assignment: Assignment, users: ReadonlyMap<string, { name: string }>) {
   if (assignment.assignedBy === "ai") return "AI dispatch engine";
   return users.get(assignment.assignedBy)?.name ?? assignment.assignedBy;
 }
