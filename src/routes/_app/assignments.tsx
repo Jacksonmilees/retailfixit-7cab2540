@@ -23,6 +23,7 @@ import {
 import { StatusBadge, PriorityBadge, RiskBadge, TimeAgo } from "@/components/common/badges";
 import { TableSkeleton } from "@/components/common/Skeletons";
 import { PageHeader, EmptyState } from "@/components/common/PageHeader";
+import { JobDetailSheet, VendorDetailSheet } from "@/components/common/DetailSheets";
 import type { Assignment, Job, Vendor } from "@/lib/types";
 import {
   ArrowRightLeft,
@@ -43,6 +44,8 @@ export const Route = createFileRoute("/_app/assignments")({
 
 function AssignmentsPage() {
   const [selectedId, setSelectedId] = React.useState<string | null>(null);
+  const [selectedJobId, setSelectedJobId] = React.useState<string | null>(null);
+  const [selectedVendorId, setSelectedVendorId] = React.useState<string | null>(null);
   const all = useQuery({
     queryKey: ["assignments"],
     queryFn: () => api.listAssignments({ pageSize: 100 }),
@@ -64,6 +67,12 @@ function AssignmentsPage() {
   );
   const umap = React.useMemo(() => new Map((users.data ?? []).map((u) => [u.id, u])), [users.data]);
   const selected = all.data?.items.find((a) => a.id === selectedId) ?? null;
+  const selectedJob = selectedJobId ? jmap.get(selectedJobId) ?? null : null;
+  const selectedJobAssignment = selectedJob
+    ? all.data?.items.find((a) => a.jobId === selectedJob.id)
+    : undefined;
+  const selectedJobVendor = selectedJobAssignment ? vmap.get(selectedJobAssignment.vendorId) : undefined;
+  const selectedVendor = selectedVendorId ? vmap.get(selectedVendorId) ?? null : null;
 
   return (
     <div className="space-y-5">
@@ -211,6 +220,26 @@ function AssignmentsPage() {
             actorName={selected ? actorLabel(selected, umap) : ""}
             open={Boolean(selected)}
             onOpenChange={(open) => !open && setSelectedId(null)}
+            onOpenJob={(jobId) => setSelectedJobId(jobId)}
+            onOpenVendor={(vendorId) => setSelectedVendorId(vendorId)}
+          />
+
+          <JobDetailSheet
+            job={selectedJob}
+            vendor={selectedJobVendor}
+            assignment={selectedJobAssignment}
+            actorName={selectedJobAssignment ? actorLabel(selectedJobAssignment, umap) : undefined}
+            open={Boolean(selectedJob)}
+            onOpenChange={(open) => !open && setSelectedJobId(null)}
+            title="Job details from assignment"
+          />
+
+          <VendorDetailSheet
+            vendor={selectedVendor}
+            assignments={all.data?.items ?? []}
+            jobs={jobs.data?.items ?? []}
+            open={Boolean(selectedVendor)}
+            onOpenChange={(open) => !open && setSelectedVendorId(null)}
           />
         </>
       )}
@@ -251,6 +280,8 @@ function AssignmentDetailSheet({
   actorName,
   open,
   onOpenChange,
+  onOpenJob,
+  onOpenVendor,
 }: {
   assignment: Assignment | null;
   job?: Job;
@@ -258,6 +289,8 @@ function AssignmentDetailSheet({
   actorName: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onOpenJob: (jobId: string) => void;
+  onOpenVendor: (vendorId: string) => void;
 }) {
   if (!assignment) return null;
 
@@ -329,10 +362,13 @@ function AssignmentDetailSheet({
                   </div>
                   <p className="mt-1 text-[12px] text-muted-foreground">{job.description}</p>
                 </div>
-                <Button variant="outline" size="sm" asChild className="rounded-lg">
-                  <Link to="/jobs/$jobId" params={{ jobId: job.id }}>
-                    Open <ExternalLink className="h-3.5 w-3.5" />
-                  </Link>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-lg"
+                  onClick={() => onOpenJob(job.id)}
+                >
+                  View details <ExternalLink className="h-3.5 w-3.5" />
                 </Button>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -376,10 +412,13 @@ function AssignmentDetailSheet({
                     </div>
                   </div>
                 </div>
-                <Button variant="outline" size="sm" asChild className="rounded-lg">
-                  <Link to="/vendors/$vendorId" params={{ vendorId: vendor.id }}>
-                    Open <ExternalLink className="h-3.5 w-3.5" />
-                  </Link>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-lg"
+                  onClick={() => onOpenVendor(vendor.id)}
+                >
+                  View vendor <ExternalLink className="h-3.5 w-3.5" />
                 </Button>
               </div>
               <div className="grid gap-2 sm:grid-cols-2">
