@@ -161,8 +161,3 @@ function ObservabilityPage() {
   );
 }
 
-function ObservabilityPage() { return <ObservabilityPageInner />; }
-function ObservabilityPageInner() {
-  // placeholder wrapper to satisfy router default; component is the exported one above
-  return null;
-}
