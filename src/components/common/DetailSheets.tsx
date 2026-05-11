@@ -16,8 +16,6 @@ import {
   MapPin,
   Phone,
   Sparkles,
-  Star,
-  Timer,
   User,
   Wrench,
 } from "lucide-react";
