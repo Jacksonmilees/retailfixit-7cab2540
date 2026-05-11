@@ -12,7 +12,7 @@ import { TableSkeleton } from "@/components/common/Skeletons";
 import { FluentSpinner } from "@/components/common/FluentSpinner";
 import { Search, Plus, RefreshCcw } from "lucide-react";
 import { JobDetailSheet, VendorDetailSheet, CustomerDetailSheet, type CustomerProfile } from "@/components/common/DetailSheets";
-import type { Assignment, Job, JobStatus, JobPriority, User, Vendor } from "@/lib/types";
+import type { Assignment, Job, JobStatus, JobPriority, User } from "@/lib/types";
 import { useRealtime } from "@/hooks/use-realtime";
 import {
   Dialog,
