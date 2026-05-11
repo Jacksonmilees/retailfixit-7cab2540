@@ -16,9 +16,11 @@ import { Route as AppVendorsRouteImport } from './routes/_app/vendors'
 import { Route as AppUsersRouteImport } from './routes/_app/users'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppReportsRouteImport } from './routes/_app/reports'
+import { Route as AppRbacRouteImport } from './routes/_app/rbac'
 import { Route as AppObservabilityRouteImport } from './routes/_app/observability'
 import { Route as AppNotificationsRouteImport } from './routes/_app/notifications'
 import { Route as AppJobsRouteImport } from './routes/_app/jobs'
+import { Route as AppHealthRouteImport } from './routes/_app/health'
 import { Route as AppFeatureFlagsRouteImport } from './routes/_app/feature-flags'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppCustomersRouteImport } from './routes/_app/customers'
@@ -64,6 +66,11 @@ const AppReportsRoute = AppReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => AppRoute,
 } as any)
+const AppRbacRoute = AppRbacRouteImport.update({
+  id: '/rbac',
+  path: '/rbac',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppObservabilityRoute = AppObservabilityRouteImport.update({
   id: '/observability',
   path: '/observability',
@@ -77,6 +84,11 @@ const AppNotificationsRoute = AppNotificationsRouteImport.update({
 const AppJobsRoute = AppJobsRouteImport.update({
   id: '/jobs',
   path: '/jobs',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppHealthRoute = AppHealthRouteImport.update({
+  id: '/health',
+  path: '/health',
   getParentRoute: () => AppRoute,
 } as any)
 const AppFeatureFlagsRoute = AppFeatureFlagsRouteImport.update({
@@ -141,9 +153,11 @@ export interface FileRoutesByFullPath {
   '/customers': typeof AppCustomersRoute
   '/dashboard': typeof AppDashboardRoute
   '/feature-flags': typeof AppFeatureFlagsRoute
+  '/health': typeof AppHealthRoute
   '/jobs': typeof AppJobsRouteWithChildren
   '/notifications': typeof AppNotificationsRoute
   '/observability': typeof AppObservabilityRoute
+  '/rbac': typeof AppRbacRoute
   '/reports': typeof AppReportsRoute
   '/settings': typeof AppSettingsRoute
   '/users': typeof AppUsersRoute
@@ -162,9 +176,11 @@ export interface FileRoutesByTo {
   '/customers': typeof AppCustomersRoute
   '/dashboard': typeof AppDashboardRoute
   '/feature-flags': typeof AppFeatureFlagsRoute
+  '/health': typeof AppHealthRoute
   '/jobs': typeof AppJobsRouteWithChildren
   '/notifications': typeof AppNotificationsRoute
   '/observability': typeof AppObservabilityRoute
+  '/rbac': typeof AppRbacRoute
   '/reports': typeof AppReportsRoute
   '/settings': typeof AppSettingsRoute
   '/users': typeof AppUsersRoute
@@ -185,9 +201,11 @@ export interface FileRoutesById {
   '/_app/customers': typeof AppCustomersRoute
   '/_app/dashboard': typeof AppDashboardRoute
   '/_app/feature-flags': typeof AppFeatureFlagsRoute
+  '/_app/health': typeof AppHealthRoute
   '/_app/jobs': typeof AppJobsRouteWithChildren
   '/_app/notifications': typeof AppNotificationsRoute
   '/_app/observability': typeof AppObservabilityRoute
+  '/_app/rbac': typeof AppRbacRoute
   '/_app/reports': typeof AppReportsRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/users': typeof AppUsersRoute
@@ -208,9 +226,11 @@ export interface FileRouteTypes {
     | '/customers'
     | '/dashboard'
     | '/feature-flags'
+    | '/health'
     | '/jobs'
     | '/notifications'
     | '/observability'
+    | '/rbac'
     | '/reports'
     | '/settings'
     | '/users'
@@ -229,9 +249,11 @@ export interface FileRouteTypes {
     | '/customers'
     | '/dashboard'
     | '/feature-flags'
+    | '/health'
     | '/jobs'
     | '/notifications'
     | '/observability'
+    | '/rbac'
     | '/reports'
     | '/settings'
     | '/users'
@@ -251,9 +273,11 @@ export interface FileRouteTypes {
     | '/_app/customers'
     | '/_app/dashboard'
     | '/_app/feature-flags'
+    | '/_app/health'
     | '/_app/jobs'
     | '/_app/notifications'
     | '/_app/observability'
+    | '/_app/rbac'
     | '/_app/reports'
     | '/_app/settings'
     | '/_app/users'
@@ -319,6 +343,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppReportsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/rbac': {
+      id: '/_app/rbac'
+      path: '/rbac'
+      fullPath: '/rbac'
+      preLoaderRoute: typeof AppRbacRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/observability': {
       id: '/_app/observability'
       path: '/observability'
@@ -338,6 +369,13 @@ declare module '@tanstack/react-router' {
       path: '/jobs'
       fullPath: '/jobs'
       preLoaderRoute: typeof AppJobsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/health': {
+      id: '/_app/health'
+      path: '/health'
+      fullPath: '/health'
+      preLoaderRoute: typeof AppHealthRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/feature-flags': {
@@ -445,9 +483,11 @@ interface AppRouteChildren {
   AppCustomersRoute: typeof AppCustomersRoute
   AppDashboardRoute: typeof AppDashboardRoute
   AppFeatureFlagsRoute: typeof AppFeatureFlagsRoute
+  AppHealthRoute: typeof AppHealthRoute
   AppJobsRoute: typeof AppJobsRouteWithChildren
   AppNotificationsRoute: typeof AppNotificationsRoute
   AppObservabilityRoute: typeof AppObservabilityRoute
+  AppRbacRoute: typeof AppRbacRoute
   AppReportsRoute: typeof AppReportsRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppUsersRoute: typeof AppUsersRoute
@@ -463,9 +503,11 @@ const AppRouteChildren: AppRouteChildren = {
   AppCustomersRoute: AppCustomersRoute,
   AppDashboardRoute: AppDashboardRoute,
   AppFeatureFlagsRoute: AppFeatureFlagsRoute,
+  AppHealthRoute: AppHealthRoute,
   AppJobsRoute: AppJobsRouteWithChildren,
   AppNotificationsRoute: AppNotificationsRoute,
   AppObservabilityRoute: AppObservabilityRoute,
+  AppRbacRoute: AppRbacRoute,
   AppReportsRoute: AppReportsRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppUsersRoute: AppUsersRoute,
@@ -482,3 +524,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
