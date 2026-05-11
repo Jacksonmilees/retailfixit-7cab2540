@@ -159,28 +159,95 @@ export const mockAIRecommendations: AIRecommendation[] = mockJobs.slice(0, 30).m
   };
 });
 
-export const mockAudit: AuditLog[] = Array.from({ length: 60 }).map((_, i) => {
-  const job = mockJobs[i % mockJobs.length];
-  const actorRoles = ["dispatcher", "admin", "ai", "system"] as const;
-  const actorRole = actorRoles[i % actorRoles.length];
-  const actions = [
-    "job.created",
-    "job.assigned",
-    "job.status_changed",
-    "ai.recommendation.generated",
-    "ai.recommendation.overridden",
-    "vendor.updated",
-    "user.login",
-  ];
-  return {
-    id: `log_${5000 + i}`,
-    tenantId: TENANT.id,
-    actor: actorRole === "ai" ? "ai" : actorRole === "system" ? "system" : mockUsers[i % mockUsers.length].id,
-    actorRole,
-    action: actions[i % actions.length],
-    entityType: "job",
-    entityId: job.id,
-    metadata: { reference: job.reference, status: job.status },
-    createdAt: isoDaysAgo(i / 10),
-  };
-});
+function corrId(i: number) {
+  return `cor_${(0xa1b2c3 + i * 977).toString(16)}`;
+}
+function traceIdFor(i: number) {
+  return `00-${(0xdeadbeef + i).toString(16).padStart(32, "0").slice(0, 32)}-${(0xfeed + i).toString(16).padStart(16, "0").slice(0, 16)}-01`;
+}
+
+// Build a per-job lifecycle so timelines look real:
+// JobCreated → AIRecommendationRequested → AIRecommendationReady → JobAssigned → AssignmentAccepted → JobCompleted
+export const mockAudit: AuditLog[] = (() => {
+  const logs: AuditLog[] = [];
+  let n = 5000;
+  mockJobs.slice(0, 30).forEach((job, i) => {
+    const cor = corrId(i);
+    const trace = traceIdFor(i);
+    const baseDay = (i % 10) + 0.4;
+    const vendorId = job.assignedVendorId ?? mockVendors[i % mockVendors.length].id;
+    const dispatcher = mockUsers[i % mockUsers.length];
+    const aiUsed = i % 3 === 0;
+
+    logs.push({
+      id: `log_${n++}`, tenantId: TENANT.id, actor: "system", actorRole: "system",
+      action: "job.created", entityType: "job", entityId: job.id,
+      metadata: { reference: job.reference, channel: "intake-api" },
+      before: null,
+      after: { status: "new", priority: job.priority, category: job.category, customerName: job.customerName },
+      correlationId: cor, traceId: trace,
+      createdAt: isoDaysAgo(baseDay),
+    });
+    logs.push({
+      id: `log_${n++}`, tenantId: TENANT.id, actor: "ai", actorRole: "ai",
+      action: "ai.recommendation.requested", entityType: "ai", entityId: `r_req_${i}`,
+      metadata: { model: "gpt-4o-mini-2025-03", promptVersion: "v3.2", temperature: 0.2 },
+      correlationId: cor, traceId: trace,
+      createdAt: isoDaysAgo(baseDay - 0.02),
+    });
+    logs.push({
+      id: `log_${n++}`, tenantId: TENANT.id, actor: "ai", actorRole: "ai",
+      action: "ai.recommendation.ready", entityType: "ai", entityId: `r_${4000 + i}`,
+      metadata: { latencyMs: 380 + (i * 23) % 1200, candidates: 3, confidence: 0.92 - (i % 5) * 0.04, fallback: i % 9 === 0 },
+      correlationId: cor, traceId: trace,
+      createdAt: isoDaysAgo(baseDay - 0.04),
+    });
+    if (job.assignedVendorId) {
+      logs.push({
+        id: `log_${n++}`, tenantId: TENANT.id,
+        actor: aiUsed ? "ai" : dispatcher.id, actorRole: aiUsed ? "ai" : "dispatcher",
+        action: aiUsed ? "job.assigned.ai" : "job.assigned.human",
+        entityType: "job", entityId: job.id,
+        metadata: { vendorId, source: aiUsed ? "ai" : "human", reason: aiUsed ? undefined : "Top-ranked vendor at capacity; selected #2." },
+        before: { status: "new", assignedVendorId: null },
+        after: { status: "assigned", assignedVendorId: vendorId, assignedAt: job.assignedAt },
+        correlationId: cor, traceId: trace,
+        createdAt: isoDaysAgo(baseDay - 0.06),
+      });
+      if (job.status !== "assigned") {
+        logs.push({
+          id: `log_${n++}`, tenantId: TENANT.id, actor: vendorId, actorRole: "system",
+          action: "assignment.accepted", entityType: "assignment", entityId: `a_${3000 + i}`,
+          metadata: { vendorId, etaMinutes: 45 + (i % 30) },
+          before: { status: "pending" },
+          after: { status: "accepted", acceptedAt: isoDaysAgo(baseDay - 0.08) },
+          correlationId: cor, traceId: trace,
+          createdAt: isoDaysAgo(baseDay - 0.08),
+        });
+      }
+      if (job.status === "completed") {
+        logs.push({
+          id: `log_${n++}`, tenantId: TENANT.id, actor: vendorId, actorRole: "system",
+          action: "job.completed", entityType: "job", entityId: job.id,
+          metadata: { vendorId, partsUsed: ["compressor-relay"], invoiceTotal: 420 + (i * 11) % 600 },
+          before: { status: "in_progress" },
+          after: { status: "completed", completedAt: isoDaysAgo(baseDay - 0.2) },
+          correlationId: cor, traceId: trace,
+          createdAt: isoDaysAgo(baseDay - 0.2),
+        });
+      }
+    }
+  });
+  // A few non-job events
+  for (let k = 0; k < 6; k++) {
+    logs.push({
+      id: `log_${n++}`, tenantId: TENANT.id,
+      actor: mockUsers[k % mockUsers.length].id, actorRole: "admin",
+      action: "user.login", entityType: "user", entityId: mockUsers[k % mockUsers.length].id,
+      metadata: { ip: `10.0.0.${10 + k}`, userAgent: "Edge/130" },
+      correlationId: corrId(900 + k), traceId: traceIdFor(900 + k),
+      createdAt: isoDaysAgo(k * 0.3),
+    });
+  }
+  return logs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+})();
