@@ -7,7 +7,6 @@ import { PriorityBadge, RiskBadge, StatusBadge, TimeAgo } from "@/components/com
 import type { Assignment, Job, Vendor } from "@/lib/types";
 import {
   Activity,
-  ArrowRightLeft,
   Building2,
   CheckCircle2,
   Clock,
@@ -16,7 +15,6 @@ import {
   Mail,
   MapPin,
   Phone,
-  ShieldCheck,
   Sparkles,
   Star,
   Timer,
