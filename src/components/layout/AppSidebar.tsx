@@ -12,6 +12,9 @@ import {
   BarChart3,
   Flag,
   FlaskConical,
+  Shield,
+  Activity,
+  HeartPulse,
 } from "lucide-react";
 import {
   Sidebar,
