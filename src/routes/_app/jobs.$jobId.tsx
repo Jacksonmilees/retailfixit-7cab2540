@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { StatusBadge, PriorityBadge, RiskBadge, TimeAgo } from "@/components/common/badges";
 import {
   Sparkles, ChevronLeft, MapPin, Phone, User, Wand2, AlertCircle, CheckCircle2,
-  Clock, Star, FileDown, ExternalLink, Send, Search, ShieldCheck,
+  Clock, Star, FileDown, ExternalLink, Send, Search, ShieldCheck, Timer,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -21,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { useRealtime } from "@/hooks/use-realtime";
-import type { Vendor, AIRecommendation } from "@/lib/types";
+import type { Vendor, AIRecommendation, Assignment } from "@/lib/types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -39,6 +39,8 @@ function JobDetail() {
   const job = useQuery({ queryKey: ["job", jobId], queryFn: () => api.getJob(jobId) });
   const rec = useQuery({ queryKey: ["rec", jobId], queryFn: () => api.getRecommendation(jobId) });
   const vendors = useQuery({ queryKey: ["vendors-all"], queryFn: () => api.listVendors({ pageSize: 100 }) });
+  const assignments = useQuery({ queryKey: ["assignments-job", jobId], queryFn: () => api.listAssignments({ pageSize: 100 }) });
+  const users = useQuery({ queryKey: ["users"], queryFn: () => api.listUsers() });
   const audit = useQuery({ queryKey: ["audit-job", jobId], queryFn: () => api.listAudit({ pageSize: 50 }) });
 
   useRealtime(["job.updated", "job.assigned", "ai.recommendation.ready"], (e) => {
@@ -46,12 +48,15 @@ function JobDetail() {
     if (id === jobId) {
       qc.invalidateQueries({ queryKey: ["job", jobId] });
       qc.invalidateQueries({ queryKey: ["rec", jobId] });
+      qc.invalidateQueries({ queryKey: ["assignments-job", jobId] });
     }
   });
 
   if (job.isLoading || !job.data) return <DetailSkeleton />;
   const j = job.data;
   const assigned = vendors.data?.items.find((v) => v.id === j.assignedVendorId);
+  const currentAssignment = assignments.data?.items.find((a) => a.jobId === jobId && a.vendorId === j.assignedVendorId);
+  const assignedBy = currentAssignment ? assignmentActor(currentAssignment, users.data ?? []) : "Not assigned";
   const jobAudit = audit.data?.items.filter((a) => a.entityId === jobId) ?? [];
 
   function exportPdf() {
