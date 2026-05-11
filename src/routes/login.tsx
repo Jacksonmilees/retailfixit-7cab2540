@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Toaster } from "@/components/ui/sonner";
-import { ArrowRight, Sparkles, ShieldCheck, Zap } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { FluentSpinner } from "@/components/common/FluentSpinner";
 
 export const Route = createFileRoute("/login")({
