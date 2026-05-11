@@ -15,11 +15,17 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppVendorsRouteImport } from './routes/_app/vendors'
 import { Route as AppUsersRouteImport } from './routes/_app/users'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
+import { Route as AppReportsRouteImport } from './routes/_app/reports'
+import { Route as AppNotificationsRouteImport } from './routes/_app/notifications'
 import { Route as AppJobsRouteImport } from './routes/_app/jobs'
+import { Route as AppFeatureFlagsRouteImport } from './routes/_app/feature-flags'
 import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppCustomersRouteImport } from './routes/_app/customers'
 import { Route as AppAuditRouteImport } from './routes/_app/audit'
 import { Route as AppAssignmentsRouteImport } from './routes/_app/assignments'
+import { Route as AppAiEvalRouteImport } from './routes/_app/ai-eval'
 import { Route as AppAiRouteImport } from './routes/_app/ai'
+import { Route as AppVendorsVendorIdRouteImport } from './routes/_app/vendors.$vendorId'
 import { Route as AppJobsJobIdRouteImport } from './routes/_app/jobs.$jobId'
 
 const LoginRoute = LoginRouteImport.update({
@@ -51,14 +57,34 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AppRoute,
 } as any)
+const AppReportsRoute = AppReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppNotificationsRoute = AppNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppJobsRoute = AppJobsRouteImport.update({
   id: '/jobs',
   path: '/jobs',
   getParentRoute: () => AppRoute,
 } as any)
+const AppFeatureFlagsRoute = AppFeatureFlagsRouteImport.update({
+  id: '/feature-flags',
+  path: '/feature-flags',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCustomersRoute = AppCustomersRouteImport.update({
+  id: '/customers',
+  path: '/customers',
   getParentRoute: () => AppRoute,
 } as any)
 const AppAuditRoute = AppAuditRouteImport.update({
@@ -71,10 +97,20 @@ const AppAssignmentsRoute = AppAssignmentsRouteImport.update({
   path: '/assignments',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAiEvalRoute = AppAiEvalRouteImport.update({
+  id: '/ai-eval',
+  path: '/ai-eval',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAiRoute = AppAiRouteImport.update({
   id: '/ai',
   path: '/ai',
   getParentRoute: () => AppRoute,
+} as any)
+const AppVendorsVendorIdRoute = AppVendorsVendorIdRouteImport.update({
+  id: '/$vendorId',
+  path: '/$vendorId',
+  getParentRoute: () => AppVendorsRoute,
 } as any)
 const AppJobsJobIdRoute = AppJobsJobIdRouteImport.update({
   id: '/$jobId',
@@ -86,27 +122,39 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/ai': typeof AppAiRoute
+  '/ai-eval': typeof AppAiEvalRoute
   '/assignments': typeof AppAssignmentsRoute
   '/audit': typeof AppAuditRoute
+  '/customers': typeof AppCustomersRoute
   '/dashboard': typeof AppDashboardRoute
+  '/feature-flags': typeof AppFeatureFlagsRoute
   '/jobs': typeof AppJobsRouteWithChildren
+  '/notifications': typeof AppNotificationsRoute
+  '/reports': typeof AppReportsRoute
   '/settings': typeof AppSettingsRoute
   '/users': typeof AppUsersRoute
-  '/vendors': typeof AppVendorsRoute
+  '/vendors': typeof AppVendorsRouteWithChildren
   '/jobs/$jobId': typeof AppJobsJobIdRoute
+  '/vendors/$vendorId': typeof AppVendorsVendorIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/ai': typeof AppAiRoute
+  '/ai-eval': typeof AppAiEvalRoute
   '/assignments': typeof AppAssignmentsRoute
   '/audit': typeof AppAuditRoute
+  '/customers': typeof AppCustomersRoute
   '/dashboard': typeof AppDashboardRoute
+  '/feature-flags': typeof AppFeatureFlagsRoute
   '/jobs': typeof AppJobsRouteWithChildren
+  '/notifications': typeof AppNotificationsRoute
+  '/reports': typeof AppReportsRoute
   '/settings': typeof AppSettingsRoute
   '/users': typeof AppUsersRoute
-  '/vendors': typeof AppVendorsRoute
+  '/vendors': typeof AppVendorsRouteWithChildren
   '/jobs/$jobId': typeof AppJobsJobIdRoute
+  '/vendors/$vendorId': typeof AppVendorsVendorIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -114,14 +162,20 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/login': typeof LoginRoute
   '/_app/ai': typeof AppAiRoute
+  '/_app/ai-eval': typeof AppAiEvalRoute
   '/_app/assignments': typeof AppAssignmentsRoute
   '/_app/audit': typeof AppAuditRoute
+  '/_app/customers': typeof AppCustomersRoute
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/feature-flags': typeof AppFeatureFlagsRoute
   '/_app/jobs': typeof AppJobsRouteWithChildren
+  '/_app/notifications': typeof AppNotificationsRoute
+  '/_app/reports': typeof AppReportsRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/users': typeof AppUsersRoute
-  '/_app/vendors': typeof AppVendorsRoute
+  '/_app/vendors': typeof AppVendorsRouteWithChildren
   '/_app/jobs/$jobId': typeof AppJobsJobIdRoute
+  '/_app/vendors/$vendorId': typeof AppVendorsVendorIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -129,41 +183,59 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/ai'
+    | '/ai-eval'
     | '/assignments'
     | '/audit'
+    | '/customers'
     | '/dashboard'
+    | '/feature-flags'
     | '/jobs'
+    | '/notifications'
+    | '/reports'
     | '/settings'
     | '/users'
     | '/vendors'
     | '/jobs/$jobId'
+    | '/vendors/$vendorId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/login'
     | '/ai'
+    | '/ai-eval'
     | '/assignments'
     | '/audit'
+    | '/customers'
     | '/dashboard'
+    | '/feature-flags'
     | '/jobs'
+    | '/notifications'
+    | '/reports'
     | '/settings'
     | '/users'
     | '/vendors'
     | '/jobs/$jobId'
+    | '/vendors/$vendorId'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/login'
     | '/_app/ai'
+    | '/_app/ai-eval'
     | '/_app/assignments'
     | '/_app/audit'
+    | '/_app/customers'
     | '/_app/dashboard'
+    | '/_app/feature-flags'
     | '/_app/jobs'
+    | '/_app/notifications'
+    | '/_app/reports'
     | '/_app/settings'
     | '/_app/users'
     | '/_app/vendors'
     | '/_app/jobs/$jobId'
+    | '/_app/vendors/$vendorId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -216,6 +288,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppSettingsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/reports': {
+      id: '/_app/reports'
+      path: '/reports'
+      fullPath: '/reports'
+      preLoaderRoute: typeof AppReportsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/notifications': {
+      id: '/_app/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AppNotificationsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/jobs': {
       id: '/_app/jobs'
       path: '/jobs'
@@ -223,11 +309,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppJobsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/feature-flags': {
+      id: '/_app/feature-flags'
+      path: '/feature-flags'
+      fullPath: '/feature-flags'
+      preLoaderRoute: typeof AppFeatureFlagsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/dashboard': {
       id: '/_app/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
       preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/customers': {
+      id: '/_app/customers'
+      path: '/customers'
+      fullPath: '/customers'
+      preLoaderRoute: typeof AppCustomersRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/audit': {
@@ -244,12 +344,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAssignmentsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/ai-eval': {
+      id: '/_app/ai-eval'
+      path: '/ai-eval'
+      fullPath: '/ai-eval'
+      preLoaderRoute: typeof AppAiEvalRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/ai': {
       id: '/_app/ai'
       path: '/ai'
       fullPath: '/ai'
       preLoaderRoute: typeof AppAiRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/_app/vendors/$vendorId': {
+      id: '/_app/vendors/$vendorId'
+      path: '/$vendorId'
+      fullPath: '/vendors/$vendorId'
+      preLoaderRoute: typeof AppVendorsVendorIdRouteImport
+      parentRoute: typeof AppVendorsRoute
     }
     '/_app/jobs/$jobId': {
       id: '/_app/jobs/$jobId'
@@ -272,26 +386,48 @@ const AppJobsRouteChildren: AppJobsRouteChildren = {
 const AppJobsRouteWithChildren =
   AppJobsRoute._addFileChildren(AppJobsRouteChildren)
 
+interface AppVendorsRouteChildren {
+  AppVendorsVendorIdRoute: typeof AppVendorsVendorIdRoute
+}
+
+const AppVendorsRouteChildren: AppVendorsRouteChildren = {
+  AppVendorsVendorIdRoute: AppVendorsVendorIdRoute,
+}
+
+const AppVendorsRouteWithChildren = AppVendorsRoute._addFileChildren(
+  AppVendorsRouteChildren,
+)
+
 interface AppRouteChildren {
   AppAiRoute: typeof AppAiRoute
+  AppAiEvalRoute: typeof AppAiEvalRoute
   AppAssignmentsRoute: typeof AppAssignmentsRoute
   AppAuditRoute: typeof AppAuditRoute
+  AppCustomersRoute: typeof AppCustomersRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppFeatureFlagsRoute: typeof AppFeatureFlagsRoute
   AppJobsRoute: typeof AppJobsRouteWithChildren
+  AppNotificationsRoute: typeof AppNotificationsRoute
+  AppReportsRoute: typeof AppReportsRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppUsersRoute: typeof AppUsersRoute
-  AppVendorsRoute: typeof AppVendorsRoute
+  AppVendorsRoute: typeof AppVendorsRouteWithChildren
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppAiRoute: AppAiRoute,
+  AppAiEvalRoute: AppAiEvalRoute,
   AppAssignmentsRoute: AppAssignmentsRoute,
   AppAuditRoute: AppAuditRoute,
+  AppCustomersRoute: AppCustomersRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppFeatureFlagsRoute: AppFeatureFlagsRoute,
   AppJobsRoute: AppJobsRouteWithChildren,
+  AppNotificationsRoute: AppNotificationsRoute,
+  AppReportsRoute: AppReportsRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppUsersRoute: AppUsersRoute,
-  AppVendorsRoute: AppVendorsRoute,
+  AppVendorsRoute: AppVendorsRouteWithChildren,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

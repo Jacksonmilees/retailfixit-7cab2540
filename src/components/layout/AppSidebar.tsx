@@ -2,13 +2,17 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   ClipboardList,
-  Users2,
   ShieldCheck,
   Sparkles,
   ScrollText,
   Settings,
   Building2,
   UserCog,
+  Users,
+  Bell,
+  BarChart3,
+  Flag,
+  FlaskConical,
 } from "lucide-react";
 import {
   Sidebar,
@@ -25,17 +29,25 @@ import {
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/lib/auth/context";
 
-const main = [
+const operate = [
   { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
   { title: "Jobs", url: "/jobs", icon: ClipboardList },
   { title: "Vendors", url: "/vendors", icon: Building2 },
+  { title: "Customers", url: "/customers", icon: Users },
   { title: "Assignments", url: "/assignments", icon: ShieldCheck },
+  { title: "Notifications", url: "/notifications", icon: Bell },
+];
+
+const intelligence = [
   { title: "AI Insights", url: "/ai", icon: Sparkles },
+  { title: "AI Evaluation", url: "/ai-eval", icon: FlaskConical },
+  { title: "Reports", url: "/reports", icon: BarChart3 },
 ];
 
 const admin = [
   { title: "Audit log", url: "/audit", icon: ScrollText },
   { title: "Users & roles", url: "/users", icon: UserCog },
+  { title: "Feature flags", url: "/feature-flags", icon: Flag },
   { title: "Settings", url: "/settings", icon: Settings },
 ];
 
@@ -45,72 +57,65 @@ export function AppSidebar() {
   const path = useRouterState({ select: (r) => r.location.pathname });
   const { user } = useAuth();
 
-  const isActive = (url: string) =>
-    url === "/" ? path === "/" : path === url || path.startsWith(url + "/");
+  const isActive = (url: string) => path === url || path.startsWith(url + "/");
+
+  const renderGroup = (label: string, items: typeof operate) => (
+    <SidebarGroup>
+      {!collapsed && <SidebarGroupLabel className="text-[11px] font-medium uppercase tracking-wider text-sidebar-foreground/50 px-3">{label}</SidebarGroupLabel>}
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {items.map((item) => (
+            <SidebarMenuItem key={item.url}>
+              <SidebarMenuButton
+                asChild
+                isActive={isActive(item.url)}
+                tooltip={item.title}
+                className="data-[active=true]:bg-sidebar-accent data-[active=true]:text-sidebar-accent-foreground data-[active=true]:font-medium hover:bg-sidebar-accent/60 transition-colors h-9 rounded-lg"
+              >
+                <Link to={item.url} className="flex items-center gap-2.5">
+                  <item.icon className="h-[18px] w-[18px]" />
+                  <span className="text-[13px]">{item.title}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  );
 
   return (
-    <Sidebar collapsible="icon" className="border-r-0">
-      <SidebarHeader className="border-b border-sidebar-border">
-        <Link to="/" className="flex items-center gap-2 px-2 py-1.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground font-semibold">
+    <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+      <SidebarHeader className="border-b border-sidebar-border h-14 justify-center">
+        <Link to="/dashboard" className="flex items-center gap-2.5 px-2">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-brand text-primary-foreground font-semibold shadow-pop">
             R
           </div>
           {!collapsed && (
             <div className="flex flex-col leading-tight">
-              <span className="text-sm font-semibold text-sidebar-foreground">RetailFixIt</span>
-              <span className="text-[11px] text-sidebar-foreground/60">Operations</span>
+              <span className="text-[13px] font-semibold tracking-tight text-sidebar-foreground">RetailFixIt</span>
+              <span className="text-[10px] text-sidebar-foreground/50">Operations</span>
             </div>
           )}
         </Link>
       </SidebarHeader>
 
-      <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Operate</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {main.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                    <Link to={item.url} className="flex items-center gap-2">
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        <SidebarGroup>
-          <SidebarGroupLabel>Administer</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {admin.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton asChild isActive={isActive(item.url)} tooltip={item.title}>
-                    <Link to={item.url} className="flex items-center gap-2">
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+      <SidebarContent className="gap-0 py-2">
+        {renderGroup("Operate", operate)}
+        {renderGroup("Intelligence", intelligence)}
+        {renderGroup("Administer", admin)}
       </SidebarContent>
 
       <SidebarFooter className="border-t border-sidebar-border">
-        <div className="flex items-center gap-2 px-2 py-1.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-sidebar-accent text-sidebar-accent-foreground text-xs font-medium">
+        <div className="flex items-center gap-2.5 px-2 py-1.5">
+          <div className="relative flex h-8 w-8 items-center justify-center rounded-full bg-brand text-primary-foreground text-[11px] font-medium shadow-pop">
             {(user?.name ?? "?").split(" ").map((n) => n[0]).slice(0, 2).join("")}
+            <span className="absolute -bottom-0 -right-0 h-2.5 w-2.5 rounded-full bg-success border-2 border-sidebar" />
           </div>
           {!collapsed && (
-            <div className="flex flex-col leading-tight overflow-hidden">
-              <span className="truncate text-xs font-medium text-sidebar-foreground">{user?.name}</span>
-              <span className="truncate text-[11px] text-sidebar-foreground/60">{user?.roles.join(" · ")}</span>
+            <div className="flex flex-col leading-tight overflow-hidden min-w-0">
+              <span className="truncate text-[12px] font-medium text-sidebar-foreground">{user?.name}</span>
+              <span className="truncate text-[10px] text-sidebar-foreground/50 capitalize">{user?.roles[0]?.replace("_", " ")}</span>
             </div>
           )}
         </div>
