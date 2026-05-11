@@ -140,6 +140,7 @@ export function AppShell() {
           </main>
         </div>
         <Toaster richColors position="top-right" />
+        <CommandPalette />
       </div>
     </SidebarProvider>
   );
