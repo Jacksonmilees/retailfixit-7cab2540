@@ -1,3 +1,4 @@
+import * as React from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
@@ -10,6 +11,7 @@ import { MetricCard } from "@/components/common/MetricCard";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge, TimeAgo } from "@/components/common/badges";
 import { DetailSkeleton } from "@/components/common/Skeletons";
+import { JobDetailSheet } from "@/components/common/DetailSheets";
 import { generateVendorReport } from "@/lib/reports/pdf";
 import { toast } from "sonner";
 
@@ -22,10 +24,15 @@ function VendorDetail() {
   const v = useQuery({ queryKey: ["vendor", vendorId], queryFn: () => api.getVendor(vendorId) });
   const assignments = useQuery({ queryKey: ["vendor-assignments", vendorId], queryFn: () => api.listAssignments({ vendorId, pageSize: 50 }) });
   const jobs = useQuery({ queryKey: ["jobs-all"], queryFn: () => api.listJobs({ pageSize: 200 }) });
+  const [selectedJobId, setSelectedJobId] = React.useState<string | null>(null);
 
   if (v.isLoading || !v.data) return <DetailSkeleton />;
   const vendor = v.data;
   const jmap = new Map((jobs.data?.items ?? []).map((j) => [j.id, j]));
+  const selectedJob = selectedJobId ? jmap.get(selectedJobId) ?? null : null;
+  const selectedAssignment = selectedJob
+    ? assignments.data?.items.find((a) => a.jobId === selectedJob.id)
+    : undefined;
 
   return (
     <div className="space-y-5">
@@ -84,9 +91,9 @@ function VendorDetail() {
                 {assignments.data?.items.slice(0, 10).map((a) => {
                   const j = jmap.get(a.jobId);
                   return (
-                    <TableRow key={a.id}>
+                    <TableRow key={a.id} className="cursor-pointer" onClick={() => j && setSelectedJobId(j.id)}>
                       <TableCell>
-                        {j ? <Link to="/jobs/$jobId" params={{ jobId: j.id }} className="text-primary hover:underline">{j.reference}</Link> : a.jobId}
+                        {j ? <button type="button" className="text-primary hover:underline" onClick={(e) => { e.stopPropagation(); setSelectedJobId(j.id); }}>{j.reference}</button> : a.jobId}
                         <div className="text-[11px] text-muted-foreground truncate max-w-[200px]">{j?.title}</div>
                       </TableCell>
                       <TableCell>{j && <StatusBadge status={j.status} />}</TableCell>
@@ -114,6 +121,15 @@ function VendorDetail() {
           </CardContent>
         </Card>
       </div>
+
+      <JobDetailSheet
+        job={selectedJob}
+        vendor={vendor}
+        assignment={selectedAssignment}
+        open={Boolean(selectedJob)}
+        onOpenChange={(open) => !open && setSelectedJobId(null)}
+        title="Vendor assignment job details"
+      />
     </div>
   );
 }
