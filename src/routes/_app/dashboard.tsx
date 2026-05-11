@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { AlertTriangle, BriefcaseBusiness, Clock, Sparkles, ArrowUpRight, Activity } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis, BarChart, Bar, Cell } from "recharts";
 import { StatusBadge, PriorityBadge, TimeAgo } from "@/components/common/badges";
-import { Skeleton } from "@/components/ui/skeleton";
+import { ListSkeleton, ChartSkeleton, MetricCardSkeleton } from "@/components/common/Skeletons";
 import { useRealtime } from "@/hooks/use-realtime";
 import { LiveDot } from "@/components/common/PageHeader";
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,7 @@ function Dashboard() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {metrics.isLoading || !m ? (
-          Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-2xl" />)
+          Array.from({ length: 4 }).map((_, i) => <MetricCardSkeleton key={i} />)
         ) : (
           <>
             <MetricCard label="Open jobs" value={m.jobsOpen} icon={BriefcaseBusiness} hint={`${m.jobsAssignedToday} assigned today`} delta="+12%" trend="up" tone="primary" />
@@ -160,7 +160,7 @@ function Dashboard() {
                   </span>
                 </Link>
               ))}
-              {recent.isLoading && Array.from({ length: 6 }).map((_, i) => <Skeleton key={i} className="h-12 my-2" />)}
+              {recent.isLoading && <div className="py-2"><ListSkeleton rows={5} /></div>}
             </div>
           </CardContent>
         </Card>
