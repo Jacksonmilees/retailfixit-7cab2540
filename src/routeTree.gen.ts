@@ -16,6 +16,7 @@ import { Route as AppVendorsRouteImport } from './routes/_app/vendors'
 import { Route as AppUsersRouteImport } from './routes/_app/users'
 import { Route as AppSettingsRouteImport } from './routes/_app/settings'
 import { Route as AppReportsRouteImport } from './routes/_app/reports'
+import { Route as AppObservabilityRouteImport } from './routes/_app/observability'
 import { Route as AppNotificationsRouteImport } from './routes/_app/notifications'
 import { Route as AppJobsRouteImport } from './routes/_app/jobs'
 import { Route as AppFeatureFlagsRouteImport } from './routes/_app/feature-flags'
@@ -61,6 +62,11 @@ const AppSettingsRoute = AppSettingsRouteImport.update({
 const AppReportsRoute = AppReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppObservabilityRoute = AppObservabilityRouteImport.update({
+  id: '/observability',
+  path: '/observability',
   getParentRoute: () => AppRoute,
 } as any)
 const AppNotificationsRoute = AppNotificationsRouteImport.update({
@@ -137,6 +143,7 @@ export interface FileRoutesByFullPath {
   '/feature-flags': typeof AppFeatureFlagsRoute
   '/jobs': typeof AppJobsRouteWithChildren
   '/notifications': typeof AppNotificationsRoute
+  '/observability': typeof AppObservabilityRoute
   '/reports': typeof AppReportsRoute
   '/settings': typeof AppSettingsRoute
   '/users': typeof AppUsersRoute
@@ -157,6 +164,7 @@ export interface FileRoutesByTo {
   '/feature-flags': typeof AppFeatureFlagsRoute
   '/jobs': typeof AppJobsRouteWithChildren
   '/notifications': typeof AppNotificationsRoute
+  '/observability': typeof AppObservabilityRoute
   '/reports': typeof AppReportsRoute
   '/settings': typeof AppSettingsRoute
   '/users': typeof AppUsersRoute
@@ -179,6 +187,7 @@ export interface FileRoutesById {
   '/_app/feature-flags': typeof AppFeatureFlagsRoute
   '/_app/jobs': typeof AppJobsRouteWithChildren
   '/_app/notifications': typeof AppNotificationsRoute
+  '/_app/observability': typeof AppObservabilityRoute
   '/_app/reports': typeof AppReportsRoute
   '/_app/settings': typeof AppSettingsRoute
   '/_app/users': typeof AppUsersRoute
@@ -201,6 +210,7 @@ export interface FileRouteTypes {
     | '/feature-flags'
     | '/jobs'
     | '/notifications'
+    | '/observability'
     | '/reports'
     | '/settings'
     | '/users'
@@ -221,6 +231,7 @@ export interface FileRouteTypes {
     | '/feature-flags'
     | '/jobs'
     | '/notifications'
+    | '/observability'
     | '/reports'
     | '/settings'
     | '/users'
@@ -242,6 +253,7 @@ export interface FileRouteTypes {
     | '/_app/feature-flags'
     | '/_app/jobs'
     | '/_app/notifications'
+    | '/_app/observability'
     | '/_app/reports'
     | '/_app/settings'
     | '/_app/users'
@@ -305,6 +317,13 @@ declare module '@tanstack/react-router' {
       path: '/reports'
       fullPath: '/reports'
       preLoaderRoute: typeof AppReportsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/observability': {
+      id: '/_app/observability'
+      path: '/observability'
+      fullPath: '/observability'
+      preLoaderRoute: typeof AppObservabilityRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/notifications': {
@@ -428,6 +447,7 @@ interface AppRouteChildren {
   AppFeatureFlagsRoute: typeof AppFeatureFlagsRoute
   AppJobsRoute: typeof AppJobsRouteWithChildren
   AppNotificationsRoute: typeof AppNotificationsRoute
+  AppObservabilityRoute: typeof AppObservabilityRoute
   AppReportsRoute: typeof AppReportsRoute
   AppSettingsRoute: typeof AppSettingsRoute
   AppUsersRoute: typeof AppUsersRoute
@@ -445,6 +465,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppFeatureFlagsRoute: AppFeatureFlagsRoute,
   AppJobsRoute: AppJobsRouteWithChildren,
   AppNotificationsRoute: AppNotificationsRoute,
+  AppObservabilityRoute: AppObservabilityRoute,
   AppReportsRoute: AppReportsRoute,
   AppSettingsRoute: AppSettingsRoute,
   AppUsersRoute: AppUsersRoute,
