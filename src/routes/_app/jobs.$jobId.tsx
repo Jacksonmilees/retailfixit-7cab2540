@@ -273,6 +273,56 @@ function Meta({ label, value }: { label: string; value: string }) {
   );
 }
 
+function DispatchFacts({ assignment, assignedBy }: { assignment?: Assignment; assignedBy: string }) {
+  if (!assignment) {
+    return (
+      <div className="rounded-xl border border-border/60 bg-background/70 p-3 text-[12px] text-muted-foreground">
+        Assignment record is pending from the backend.
+      </div>
+    );
+  }
+  return (
+    <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+      <DispatchFact label="Source" value={assignment.assignedBy === "ai" ? "AI dispatch" : "Human dispatch"} icon={assignment.assignedBy === "ai" ? Sparkles : User} />
+      <DispatchFact label="Vendor status" value={assignment.status} icon={CheckCircle2} />
+      <DispatchFact label="Assigned by" value={assignedBy} icon={ShieldCheck} />
+      <DispatchFact label="Elapsed" value={formatDispatchDuration(assignment.assignedAt, assignment.completedAt ?? assignment.acceptedAt)} icon={Timer} />
+      <DispatchFact label="Assigned" value={formatDispatchDate(assignment.assignedAt)} icon={Clock} />
+      <DispatchFact label="Accepted" value={assignment.acceptedAt ? formatDispatchDate(assignment.acceptedAt) : "Waiting"} icon={CheckCircle2} />
+      <DispatchFact label="Completed" value={assignment.completedAt ? formatDispatchDate(assignment.completedAt) : "—"} icon={ShieldCheck} />
+      <DispatchFact label="Notes" value={assignment.notes ?? "No notes"} icon={AlertCircle} />
+    </div>
+  );
+}
+
+function DispatchFact({ label, value, icon: Icon }: { label: string; value: string; icon: React.ComponentType<{ className?: string }> }) {
+  return (
+    <div className="min-w-0 rounded-xl bg-background/70 p-3 ring-1 ring-border/60">
+      <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-muted-foreground"><Icon className="h-3 w-3" />{label}</div>
+      <div className="mt-1 truncate text-[12px] font-medium capitalize text-foreground">{value}</div>
+    </div>
+  );
+}
+
+function assignmentActor(assignment: Assignment, users: { id: string; name: string }[]) {
+  if (assignment.assignedBy === "ai") return "AI dispatch engine";
+  return users.find((user) => user.id === assignment.assignedBy)?.name ?? assignment.assignedBy;
+}
+
+function formatDispatchDate(iso: string) {
+  return new Date(iso).toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+}
+
+function formatDispatchDuration(startIso: string, endIso?: string) {
+  const minutes = Math.max(0, Math.round(((endIso ? new Date(endIso).getTime() : Date.now()) - new Date(startIso).getTime()) / 60000));
+  if (minutes < 60) return `${minutes}m`;
+  const hours = Math.floor(minutes / 60);
+  const remaining = minutes % 60;
+  if (hours < 24) return remaining ? `${hours}h ${remaining}m` : `${hours}h`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ${hours % 24}h`;
+}
+
 function VendorPopover({ vendor, children }: { vendor: Vendor; children: React.ReactNode }) {
   return (
     <HoverCard openDelay={120}>
