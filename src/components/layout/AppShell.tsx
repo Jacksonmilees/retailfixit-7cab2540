@@ -18,6 +18,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { useRealtime } from "@/hooks/use-realtime";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { CommandPalette } from "@/components/common/CommandPalette";
 
 const TITLES: Record<string, { title: string; subtitle?: string }> = {
   "/dashboard": { title: "Dashboard", subtitle: "Live operations overview" },
@@ -28,10 +29,14 @@ const TITLES: Record<string, { title: string; subtitle?: string }> = {
   "/notifications": { title: "Notifications", subtitle: "System and AI alerts" },
   "/ai": { title: "AI Insights", subtitle: "Recommendation performance" },
   "/ai-eval": { title: "AI Evaluation", subtitle: "Offline test harness" },
+  "/ai-governance": { title: "AI Governance", subtitle: "Model, prompts, and safety controls" },
   "/reports": { title: "Reports", subtitle: "Operational analytics" },
   "/audit": { title: "Audit log", subtitle: "Append-only history" },
   "/users": { title: "Users & roles", subtitle: "Access management" },
+  "/rbac": { title: "Roles & permissions", subtitle: "Effective permission matrix" },
   "/feature-flags": { title: "Feature flags", subtitle: "Rollout controls" },
+  "/observability": { title: "Observability", subtitle: "Traces, metrics, event lag" },
+  "/health": { title: "System health", subtitle: "Dependencies and circuit breakers" },
   "/settings": { title: "Settings", subtitle: "Tenant and AI controls" },
 };
 
