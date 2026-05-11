@@ -9,6 +9,8 @@ import { FlaskConical, Play, CheckCircle2, XCircle, AlertTriangle, Clock, Sparkl
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { PageHeader } from "@/components/common/PageHeader";
+import { FluentSpinner } from "@/components/common/FluentSpinner";
 
 export const Route = createFileRoute("/_app/ai-eval")({
   component: AIEvalPage,
@@ -37,6 +39,11 @@ function AIEvalPage() {
 
   return (
     <div className="space-y-5">
+      <PageHeader
+        title="AI evaluation & rollouts"
+        description="Offline test suites, A/B experiments, and drift telemetry."
+        icon={FlaskConical}
+      />
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard label="Suites" value={SUITES.length} icon={FlaskConical} tone="primary" />
         <MetricCard label="Pass rate" value="92%" icon={CheckCircle2} tone="success" delta="+1.4%" trend="up" />
@@ -67,7 +74,7 @@ function AIEvalPage() {
                     <Progress value={(s.pass / s.cases) * 100} className="mt-3 h-1.5" />
                   </div>
                   <Button size="sm" variant="outline" className="rounded-lg" onClick={() => runSuite(s.id)} disabled={running === s.id}>
-                    {running === s.id ? <span className="animate-pulse">Running…</span> : <><Play className="h-3.5 w-3.5 mr-1.5" />Run</>}
+                    {running === s.id ? <FluentSpinner size={14} className="text-primary" /> : <><Play className="h-3.5 w-3.5 mr-1.5" />Run</>}
                   </Button>
                 </div>
               </CardContent>
