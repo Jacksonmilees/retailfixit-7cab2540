@@ -23,6 +23,7 @@ import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppCustomersRouteImport } from './routes/_app/customers'
 import { Route as AppAuditRouteImport } from './routes/_app/audit'
 import { Route as AppAssignmentsRouteImport } from './routes/_app/assignments'
+import { Route as AppAiGovernanceRouteImport } from './routes/_app/ai-governance'
 import { Route as AppAiEvalRouteImport } from './routes/_app/ai-eval'
 import { Route as AppAiRouteImport } from './routes/_app/ai'
 import { Route as AppVendorsVendorIdRouteImport } from './routes/_app/vendors.$vendorId'
@@ -97,6 +98,11 @@ const AppAssignmentsRoute = AppAssignmentsRouteImport.update({
   path: '/assignments',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAiGovernanceRoute = AppAiGovernanceRouteImport.update({
+  id: '/ai-governance',
+  path: '/ai-governance',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAiEvalRoute = AppAiEvalRouteImport.update({
   id: '/ai-eval',
   path: '/ai-eval',
@@ -123,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/ai': typeof AppAiRoute
   '/ai-eval': typeof AppAiEvalRoute
+  '/ai-governance': typeof AppAiGovernanceRoute
   '/assignments': typeof AppAssignmentsRoute
   '/audit': typeof AppAuditRoute
   '/customers': typeof AppCustomersRoute
@@ -142,6 +149,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/ai': typeof AppAiRoute
   '/ai-eval': typeof AppAiEvalRoute
+  '/ai-governance': typeof AppAiGovernanceRoute
   '/assignments': typeof AppAssignmentsRoute
   '/audit': typeof AppAuditRoute
   '/customers': typeof AppCustomersRoute
@@ -163,6 +171,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/_app/ai': typeof AppAiRoute
   '/_app/ai-eval': typeof AppAiEvalRoute
+  '/_app/ai-governance': typeof AppAiGovernanceRoute
   '/_app/assignments': typeof AppAssignmentsRoute
   '/_app/audit': typeof AppAuditRoute
   '/_app/customers': typeof AppCustomersRoute
@@ -184,6 +193,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/ai'
     | '/ai-eval'
+    | '/ai-governance'
     | '/assignments'
     | '/audit'
     | '/customers'
@@ -203,6 +213,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/ai'
     | '/ai-eval'
+    | '/ai-governance'
     | '/assignments'
     | '/audit'
     | '/customers'
@@ -223,6 +234,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/_app/ai'
     | '/_app/ai-eval'
+    | '/_app/ai-governance'
     | '/_app/assignments'
     | '/_app/audit'
     | '/_app/customers'
@@ -344,6 +356,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAssignmentsRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/ai-governance': {
+      id: '/_app/ai-governance'
+      path: '/ai-governance'
+      fullPath: '/ai-governance'
+      preLoaderRoute: typeof AppAiGovernanceRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/ai-eval': {
       id: '/_app/ai-eval'
       path: '/ai-eval'
@@ -401,6 +420,7 @@ const AppVendorsRouteWithChildren = AppVendorsRoute._addFileChildren(
 interface AppRouteChildren {
   AppAiRoute: typeof AppAiRoute
   AppAiEvalRoute: typeof AppAiEvalRoute
+  AppAiGovernanceRoute: typeof AppAiGovernanceRoute
   AppAssignmentsRoute: typeof AppAssignmentsRoute
   AppAuditRoute: typeof AppAuditRoute
   AppCustomersRoute: typeof AppCustomersRoute
@@ -417,6 +437,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppAiRoute: AppAiRoute,
   AppAiEvalRoute: AppAiEvalRoute,
+  AppAiGovernanceRoute: AppAiGovernanceRoute,
   AppAssignmentsRoute: AppAssignmentsRoute,
   AppAuditRoute: AppAuditRoute,
   AppCustomersRoute: AppCustomersRoute,
