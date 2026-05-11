@@ -133,18 +133,21 @@ function JobDetail() {
               </DispatchSheet>
             </div>
             {assigned && (
-              <VendorPopover vendor={assigned}>
-                <button className="mt-3 flex items-center gap-3 w-full text-left group">
-                  <div className="h-10 w-10 rounded-xl bg-brand text-primary-foreground flex items-center justify-center text-[12px] font-semibold shadow-pop">
-                    {assigned.name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[13px] font-medium group-hover:text-primary transition-colors truncate">{assigned.name}</div>
-                    <div className="text-[11px] text-muted-foreground truncate">★ {assigned.rating} · {assigned.activeJobs}/{assigned.capacity} active · {assigned.avgResponseMinutes}m avg</div>
-                  </div>
-                  <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
-                </button>
-              </VendorPopover>
+              <div className="mt-3 space-y-3">
+                <VendorPopover vendor={assigned}>
+                  <button className="flex items-center gap-3 w-full text-left group">
+                    <div className="h-10 w-10 rounded-xl bg-brand text-primary-foreground flex items-center justify-center text-[12px] font-semibold shadow-pop">
+                      {assigned.name.split(" ").map((w) => w[0]).slice(0, 2).join("")}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[13px] font-medium group-hover:text-primary transition-colors truncate">{assigned.name}</div>
+                      <div className="text-[11px] text-muted-foreground truncate">★ {assigned.rating} · {assigned.activeJobs}/{assigned.capacity} active · {assigned.avgResponseMinutes}m avg</div>
+                    </div>
+                    <ExternalLink className="h-3.5 w-3.5 text-muted-foreground" />
+                  </button>
+                </VendorPopover>
+                <DispatchFacts assignment={currentAssignment} assignedBy={assignedBy} />
+              </div>
             )}
           </div>
 
