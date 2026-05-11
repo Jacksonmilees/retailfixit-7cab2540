@@ -5,10 +5,13 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronLeft, Star, MapPin, Phone, Mail, Activity, CheckCircle2, Pause } from "lucide-react";
+import { ChevronLeft, Star, MapPin, Phone, Mail, Activity, CheckCircle2, Pause, FileDown } from "lucide-react";
 import { MetricCard } from "@/components/common/MetricCard";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { StatusBadge, TimeAgo } from "@/components/common/badges";
+import { DetailSkeleton } from "@/components/common/Skeletons";
+import { generateVendorReport } from "@/lib/reports/pdf";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/vendors/$vendorId")({
   component: VendorDetail,
@@ -20,13 +23,18 @@ function VendorDetail() {
   const assignments = useQuery({ queryKey: ["vendor-assignments", vendorId], queryFn: () => api.listAssignments({ vendorId, pageSize: 50 }) });
   const jobs = useQuery({ queryKey: ["jobs-all"], queryFn: () => api.listJobs({ pageSize: 200 }) });
 
-  if (v.isLoading || !v.data) return <Skeleton className="h-96 rounded-2xl" />;
+  if (v.isLoading || !v.data) return <DetailSkeleton />;
   const vendor = v.data;
   const jmap = new Map((jobs.data?.items ?? []).map((j) => [j.id, j]));
 
   return (
     <div className="space-y-5">
-      <Button variant="ghost" size="sm" asChild className="-ml-2"><Link to="/vendors"><ChevronLeft className="h-4 w-4 mr-1" />All vendors</Link></Button>
+      <div className="flex items-center justify-between">
+        <Button variant="ghost" size="sm" asChild className="-ml-2"><Link to="/vendors"><ChevronLeft className="h-4 w-4 mr-1" />All vendors</Link></Button>
+        <Button size="sm" variant="outline" className="rounded-lg" onClick={() => { generateVendorReport(vendor, { assignments: assignments.data?.items, jobs: jobs.data?.items }); toast.success("Vendor report downloaded"); }}>
+          <FileDown className="h-3.5 w-3.5 mr-1.5" />Download PDF report
+        </Button>
+      </div>
 
       <Card className="border-border/60 shadow-card rounded-2xl overflow-hidden">
         <div className="h-24 bg-brand opacity-90 relative">
