@@ -3,10 +3,12 @@ import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api/client";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { MetricCard } from "@/components/common/MetricCard";
-import { Download, TrendingUp, DollarSign, Clock, Star } from "lucide-react";
+import { TrendingUp, DollarSign, Clock, Star, FileDown, Wrench } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Area, AreaChart, Bar, BarChart, CartesianGrid, Cell, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { Skeleton } from "@/components/ui/skeleton";
+import { MetricsRowSkeleton, ChartSkeleton } from "@/components/common/Skeletons";
+import { generateOperationsReport, generateServiceReport } from "@/lib/reports/pdf";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/reports")({
   component: ReportsPage,
@@ -17,20 +19,35 @@ const COLORS = ["#1A56DB", "#16A34A", "#F59E0B", "#DC2626", "#6366F1", "#0891B2"
 function ReportsPage() {
   const metrics = useQuery({ queryKey: ["metrics"], queryFn: () => api.getDashboardMetrics() });
   const jobs = useQuery({ queryKey: ["jobs-all"], queryFn: () => api.listJobs({ pageSize: 500 }) });
+  const vendors = useQuery({ queryKey: ["vendors-all"], queryFn: () => api.listVendors({ pageSize: 200 }) });
 
-  if (metrics.isLoading || !metrics.data) return <Skeleton className="h-96 rounded-2xl" />;
+  if (metrics.isLoading || !metrics.data) return (
+    <div className="space-y-5"><MetricsRowSkeleton /><div className="grid gap-4 lg:grid-cols-3"><ChartSkeleton className="lg:col-span-2" /><ChartSkeleton /></div></div>
+  );
   const m = metrics.data;
-  const revenue = (jobs.data?.items ?? []).reduce((s, j) => s + j.estimatedValue, 0);
+  const items = jobs.data?.items ?? [];
+  const revenue = items.reduce((s, j) => s + j.estimatedValue, 0);
   const byCategory = Object.entries(
-    (jobs.data?.items ?? []).reduce<Record<string, number>>((acc, j) => { acc[j.category] = (acc[j.category] ?? 0) + 1; return acc; }, {})
+    items.reduce<Record<string, number>>((acc, j) => { acc[j.category] = (acc[j.category] ?? 0) + 1; return acc; }, {})
   ).map(([name, value]) => ({ name, value }));
+  const services = Array.from(new Set(items.map(j => j.category)));
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-end gap-2">
-        <Button variant="outline" size="sm" className="rounded-lg"><Download className="h-3.5 w-3.5 mr-1.5" />Export CSV</Button>
-        <Button size="sm" className="rounded-lg"><Download className="h-3.5 w-3.5 mr-1.5" />PDF report</Button>
-      </div>
+      <Card className="border-border/60 shadow-card rounded-2xl bg-brand text-primary-foreground overflow-hidden relative">
+        <div className="absolute inset-0 bg-mesh opacity-30" />
+        <CardContent className="p-5 flex flex-wrap items-center justify-between gap-4 relative">
+          <div>
+            <div className="text-[11px] uppercase tracking-wider opacity-80">Operations report</div>
+            <div className="text-[18px] font-semibold mt-0.5">Full PDF · all metrics, vendors, services</div>
+            <div className="text-[12px] opacity-80 mt-0.5">{items.length} jobs · {vendors.data?.items.length ?? 0} vendors · ${(revenue/1000).toFixed(1)}k value</div>
+          </div>
+          <Button variant="secondary" size="sm" className="rounded-lg" onClick={() => { generateOperationsReport(m, items, vendors.data?.items ?? []); toast.success("Operations PDF downloaded"); }}>
+            <FileDown className="h-3.5 w-3.5 mr-1.5" />Download operations PDF
+          </Button>
+        </CardContent>
+      </Card>
+
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <MetricCard label="Total revenue" value={`$${(revenue / 1000).toFixed(1)}k`} icon={DollarSign} tone="success" delta="+18%" trend="up" hint="Estimated, last 30d" />
