@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Search, Building2, MapPin, FileDown } from "lucide-react";
+import { CustomerDetailSheet, type CustomerProfile } from "@/components/common/DetailSheets";
 import { TableSkeleton } from "@/components/common/Skeletons";
 import { EmptyState } from "@/components/common/PageHeader";
 import { generateCustomerReport } from "@/lib/reports/pdf";
@@ -17,18 +18,34 @@ export const Route = createFileRoute("/_app/customers")({
   component: CustomersPage,
 });
 
-interface Customer { name: string; jobs: number; cities: string[]; lastJob?: string }
-
 function CustomersPage() {
   const jobs = useQuery({ queryKey: ["jobs-all"], queryFn: () => api.listJobs({ pageSize: 500 }) });
   const [search, setSearch] = React.useState("");
+  const [selectedCustomerName, setSelectedCustomerName] = React.useState<string | null>(null);
 
-  const customers = React.useMemo<Customer[]>(() => {
-    const map = new Map<string, Customer>();
+  const customers = React.useMemo<CustomerProfile[]>(() => {
+    const map = new Map<string, CustomerProfile>();
     for (const j of jobs.data?.items ?? []) {
-      const c = map.get(j.customerName) ?? { name: j.customerName, jobs: 0, cities: [], lastJob: undefined };
+      const c = map.get(j.customerName) ?? {
+        name: j.customerName,
+        jobs: 0,
+        cities: [],
+        regions: [],
+        phones: [],
+        totalValue: 0,
+        openJobs: 0,
+        completedJobs: 0,
+        urgentJobs: 0,
+        lastJob: undefined,
+      };
       c.jobs++;
+      c.totalValue = (c.totalValue ?? 0) + j.estimatedValue;
+      if (!["completed", "cancelled"].includes(j.status)) c.openJobs = (c.openJobs ?? 0) + 1;
+      if (j.status === "completed") c.completedJobs = (c.completedJobs ?? 0) + 1;
+      if (j.priority === "urgent") c.urgentJobs = (c.urgentJobs ?? 0) + 1;
       if (!c.cities.includes(j.city)) c.cities.push(j.city);
+      if (c.regions && !c.regions.includes(j.region)) c.regions.push(j.region);
+      if (j.customerPhone && c.phones && !c.phones.includes(j.customerPhone)) c.phones.push(j.customerPhone);
       if (!c.lastJob || new Date(j.createdAt) > new Date(c.lastJob)) c.lastJob = j.createdAt;
       map.set(j.customerName, c);
     }
@@ -36,6 +53,7 @@ function CustomersPage() {
   }, [jobs.data]);
 
   const filtered = customers.filter((c) => c.name.toLowerCase().includes(search.toLowerCase()));
+  const selectedCustomer = selectedCustomerName ? customers.find((c) => c.name === selectedCustomerName) ?? null : null;
 
   return (
     <div className="space-y-4">
@@ -65,12 +83,12 @@ function CustomersPage() {
               </TableHeader>
               <TableBody>
                 {filtered.slice(0, 100).map((c) => (
-                  <TableRow key={c.name}>
+                  <TableRow key={c.name} className="cursor-pointer" onClick={() => setSelectedCustomerName(c.name)}>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="h-9 w-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center"><Building2 className="h-4 w-4" /></div>
                         <div>
-                          <div className="text-[13px] font-medium">{c.name}</div>
+                          <button type="button" className="text-left text-[13px] font-medium hover:text-primary" onClick={(e) => { e.stopPropagation(); setSelectedCustomerName(c.name); }}>{c.name}</button>
                           <div className="text-[11px] text-muted-foreground">Account · enterprise</div>
                         </div>
                       </div>
@@ -88,7 +106,8 @@ function CustomersPage() {
                       {c.lastJob ? new Date(c.lastJob).toLocaleDateString() : "—"}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button size="sm" variant="ghost" className="h-7 px-2 rounded-md" onClick={() => {
+                      <Button size="sm" variant="ghost" className="h-7 px-2 rounded-md" onClick={(e) => {
+                        e.stopPropagation();
                         const cjobs = (jobs.data?.items ?? []).filter(j => j.customerName === c.name);
                         generateCustomerReport(c.name, cjobs);
                         toast.success(`Report for ${c.name} downloaded`);
@@ -101,6 +120,13 @@ function CustomersPage() {
           )}
         </CardContent>
       </Card>
+
+      <CustomerDetailSheet
+        customer={selectedCustomer}
+        jobs={jobs.data?.items ?? []}
+        open={Boolean(selectedCustomer)}
+        onOpenChange={(open) => !open && setSelectedCustomerName(null)}
+      />
     </div>
   );
 }
