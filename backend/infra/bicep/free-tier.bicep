@@ -17,9 +17,8 @@ module appServicePlan 'br/public:avm/res/web/serverfarm:0.2.1' = {
     name: 'plan-retailfixit-${environment}'
     location: location
     skuName: 'F1'
-    skuTier: 'Free'
-    kind: 'linux'
-    reserved: true
+    skuCapacity: 0
+    kind: 'Linux'
   }
 }
 
@@ -99,7 +98,7 @@ module webApp 'br/public:avm/res/web/site:0.6.0' = {
         }
         {
           name: 'AZURE_STORAGE_CONNECTIONSTRING'
-          value: 'DefaultEndpointsProtocol=https;AccountName=${storage.outputs.name};AccountKey=${storage.outputs.primaryAccessKey};EndpointSuffix=core.windows.net'
+          value: 'UseDevelopmentStorage=true'
         }
         {
           name: 'AZURE_STORAGE_CONTAINER'
