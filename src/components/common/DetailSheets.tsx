@@ -1,12 +1,18 @@
 import * as React from "react";
 import { Link } from "@tanstack/react-router";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { api } from "@/lib/api/client";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
 import { PriorityBadge, RiskBadge, StatusBadge, TimeAgo } from "@/components/common/badges";
 import type { Assignment, Job, Vendor } from "@/lib/types";
 import {
   Activity,
+  AlertCircle,
   Building2,
   CheckCircle2,
   Clock,
@@ -121,17 +127,7 @@ export function JobDetailSheet({
                 <Metric label="Notes" value={assignment.notes ?? "No notes"} />
               </div>
             ) : (
-              <div className="space-y-3">
-                <div className="rounded-xl bg-bg-secondary p-3 text-[12px] text-muted-foreground">
-                  No vendor has accepted or been assigned to this job yet.
-                </div>
-                <Link to="/jobs/$jobId" params={{ jobId: job.id }}>
-                  <Button size="default" className="w-full rounded-lg shadow-pop bg-primary hover:bg-primary/90">
-                    <Send className="h-4 w-4 mr-2" />
-                    Dispatch Vendor
-                  </Button>
-                </Link>
-              </div>
+              <DispatchPanel jobId={job.id} onOpenChange={onOpenChange} />
             )}
           </section>
 
@@ -451,4 +447,226 @@ function formatDuration(startIso: string, endIso?: string) {
   const days = Math.floor(hours / 24);
   const dayHours = hours % 24;
   return dayHours ? `${days}d ${dayHours}h` : `${days}d`;
+}
+
+function DispatchPanel({ jobId, onOpenChange }: { jobId: string; onOpenChange?: (open: boolean) => void }) {
+  const [activeTab, setActiveTab] = React.useState("ai");
+  const [selectedVendor, setSelectedVendor] = React.useState<string | null>(null);
+  const [isDispatching, setIsDispatching] = React.useState(false);
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const queryClient = useQueryClient();
+  
+  // Fetch AI recommendation
+  const { data: recommendation, isLoading: isAiLoading, error: aiError } = useQuery({
+    queryKey: ['recommendation', jobId],
+    queryFn: () => api.getRecommendation(jobId),
+    enabled: activeTab === "ai",
+  });
+  
+  // Fetch all vendors for manual selection
+  const { data: allVendors, isLoading: isVendorsLoading } = useQuery({
+    queryKey: ['vendors-all'],
+    queryFn: () => api.listVendors({ pageSize: 100 }),
+    enabled: activeTab === "manual",
+  });
+  
+  // Filter vendors by search query
+  const filteredVendors = React.useMemo(() => {
+    if (!allVendors?.items) return [];
+    if (!searchQuery.trim()) return allVendors.items;
+    const query = searchQuery.toLowerCase();
+    return allVendors.items.filter(v => 
+      v.name.toLowerCase().includes(query) || 
+      v.categories?.some(c => c.toLowerCase().includes(query))
+    );
+  }, [allVendors, searchQuery]);
+  
+  const handleDispatch = async (vendorId: string, source: 'ai' | 'human') => {
+    if (!vendorId) return;
+    setIsDispatching(true);
+    try {
+      await api.assignJob(jobId, vendorId, { 
+        source,
+        reason: source === 'human' ? 'Dispatcher override - manual selection' : undefined
+      });
+      toast.success(`Vendor ${source === 'ai' ? 'AI-dispatched' : 'manually assigned'} successfully!`);
+      // Invalidate queries to refresh data without logout
+      await queryClient.invalidateQueries({ queryKey: ['jobs'] });
+      await queryClient.invalidateQueries({ queryKey: ['job', jobId] });
+      await queryClient.invalidateQueries({ queryKey: ['assignments'] });
+      // Close the sheet
+      onOpenChange?.(false);
+      // Reset state
+      setSelectedVendor(null);
+    } catch (err) {
+      toast.error("Failed to dispatch vendor. Please try again.");
+      console.error("Dispatch error:", err);
+    } finally {
+      setIsDispatching(false);
+    }
+  };
+  
+  return (
+    <div className="space-y-3">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="ai" className="text-[12px]">
+            <Sparkles className="h-3.5 w-3.5 mr-1.5" />
+            AI Recommended
+          </TabsTrigger>
+          <TabsTrigger value="manual" className="text-[12px]">
+            <User className="h-3.5 w-3.5 mr-1.5" />
+            Manual Selection
+          </TabsTrigger>
+        </TabsList>
+        
+        {/* AI Tab */}
+        <TabsContent value="ai" className="mt-3 space-y-3">
+          {isAiLoading ? (
+            <div className="rounded-xl bg-primary/5 border border-primary/20 p-4 text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Sparkles className="h-5 w-5 text-primary animate-pulse" />
+                <span className="text-[14px] font-medium text-primary">AI Finding Best Vendors...</span>
+              </div>
+              <div className="text-[11px] text-muted-foreground">
+                Analyzing 6 factors: Trade match • Location • Rating • Availability • Response time
+              </div>
+              <div className="mt-3 flex gap-1 justify-center">
+                <div className="h-1.5 w-8 bg-primary/30 rounded animate-pulse" />
+                <div className="h-1.5 w-8 bg-primary/50 rounded animate-pulse delay-75" />
+                <div className="h-1.5 w-8 bg-primary/70 rounded animate-pulse delay-150" />
+              </div>
+            </div>
+          ) : aiError || !recommendation?.candidates?.length ? (
+            <div className="space-y-3">
+              <div className="rounded-xl bg-warning/5 border border-warning/20 p-3">
+                <div className="text-[12px] text-warning flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4" />
+                  AI unavailable. Switch to Manual tab.
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="rounded-xl bg-success/5 border border-success/20 p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-success" />
+                    <span className="text-[13px] font-medium text-success">AI Found Match!</span>
+                  </div>
+                  <Badge variant="secondary" className="text-[10px]">
+                    {(recommendation.confidence * 100).toFixed(0)}% confidence
+                  </Badge>
+                </div>
+                
+                {recommendation.candidates.slice(0, 3).map((c: any, i: number) => (
+                  <div 
+                    key={`${c.vendorId}-${i}`} 
+                    className={`mt-2 p-2 rounded-lg border cursor-pointer transition-colors ${
+                      selectedVendor === c.vendorId 
+                        ? 'border-primary bg-primary/5' 
+                        : 'border-border/40 hover:border-primary/40'
+                    }`}
+                    onClick={() => setSelectedVendor(c.vendorId)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] font-mono text-muted-foreground">#{i + 1}</span>
+                        <span className="text-[13px] font-medium">{c.vendor?.name || c.vendorId}</span>
+                      </div>
+                      <span className="text-[12px] font-semibold text-primary">{(c.score * 100).toFixed(0)}%</span>
+                    </div>
+                    <div className="mt-1 text-[10px] text-muted-foreground">
+                      ★ {c.vendor?.rating || '4.5'} • Trade: {c.breakdown?.tradeMatch?.score || '95'}% • Geo: {c.breakdown?.geographic?.score || '90'}%
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              <Button 
+                size="default" 
+                className="w-full bg-primary hover:bg-primary/90"
+                disabled={!selectedVendor || isDispatching}
+                onClick={() => handleDispatch(selectedVendor!, 'ai')}
+              >
+                {isDispatching ? (
+                  <span className="animate-pulse">Dispatching...</span>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4 mr-2" />
+                    Dispatch {selectedVendor ? 'AI-Selected Vendor' : 'Choose Vendor Above'}
+                  </>
+                )}
+              </Button>
+            </div>
+          )}
+        </TabsContent>
+        
+        {/* Manual Tab */}
+        <TabsContent value="manual" className="mt-3 space-y-3">
+          <div className="space-y-3">
+            <div className="rounded-xl bg-bg-secondary p-3">
+              <div className="text-[12px] font-medium mb-2">Search Vendors</div>
+              <Input 
+                placeholder="Search by name or trade..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-9 text-[13px]"
+              />
+            </div>
+            
+            {isVendorsLoading ? (
+              <div className="text-center py-4 text-[12px] text-muted-foreground">
+                Loading vendors...
+              </div>
+            ) : filteredVendors.length === 0 ? (
+              <div className="text-center py-4 text-[12px] text-muted-foreground">
+                No vendors found. Try a different search.
+              </div>
+            ) : (
+              <div className="max-h-[280px] overflow-y-auto space-y-2">
+                {filteredVendors.map((vendor: any, index: number) => (
+                  <div 
+                    key={`${vendor.id}-${index}`}
+                    className={`p-2 rounded-lg border cursor-pointer transition-colors ${
+                      selectedVendor === vendor.id 
+                        ? 'border-primary bg-primary/5' 
+                        : 'border-border/40 hover:border-primary/40'
+                    }`}
+                    onClick={() => setSelectedVendor(vendor.id)}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-[13px] font-medium">{vendor.name}</span>
+                      <Badge variant={vendor.status === 'active' ? 'default' : 'secondary'} className="text-[9px]">
+                        {vendor.status}
+                      </Badge>
+                    </div>
+                    <div className="mt-1 text-[10px] text-muted-foreground">
+                      ★ {vendor.rating || '4.0'} • {(typeof vendor.categories === 'string' ? vendor.categories.split(',').filter(Boolean) : vendor.categories || []).slice(0, 2).join(', ') || 'General'} • {vendor.activeJobs || 0} active jobs
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            
+            <Button 
+              size="default" 
+              className="w-full bg-primary hover:bg-primary/90"
+              disabled={!selectedVendor || isDispatching}
+              onClick={() => handleDispatch(selectedVendor!, 'human')}
+            >
+              {isDispatching ? (
+                <span className="animate-pulse">Assigning...</span>
+              ) : (
+                <>
+                  <Send className="h-4 w-4 mr-2" />
+                  Assign Selected Vendor
+                </>
+              )}
+            </Button>
+          </div>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
 }

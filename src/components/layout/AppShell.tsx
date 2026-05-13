@@ -4,7 +4,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Bell, LogOut, Search, ChevronDown, Building2, Settings as SettingsIcon, User } from "lucide-react";
+import { Bell, LogOut, Search, ChevronDown, Building2, Settings as SettingsIcon, User, Wifi, WifiOff } from "lucide-react";
 import { useAuth } from "@/lib/auth/context";
 import {
   DropdownMenu,
@@ -16,9 +16,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Toaster } from "@/components/ui/sonner";
 import { useRealtime } from "@/hooks/use-realtime";
+import { useSignalRContext } from "@/lib/realtime/SignalRProvider";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { CommandPalette } from "@/components/common/CommandPalette";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const TITLES: Record<string, { title: string; subtitle?: string }> = {
   "/dashboard": { title: "Dashboard", subtitle: "Live operations overview" },
@@ -45,6 +47,7 @@ export function AppShell() {
   const { user, logout } = useAuth();
   const router = useRouter();
   const [unread, setUnread] = React.useState(3);
+  const { isConnected } = useSignalRContext();
 
   useRealtime(["job.assigned", "ai.recommendation.ready", "job.created"], (e) => {
     setUnread((u) => u + 1);
@@ -71,6 +74,21 @@ export function AppShell() {
             </div>
 
             <div className="ml-auto flex items-center gap-1.5">
+              {/* Real-time connection status */}
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div className={`flex items-center gap-1.5 px-2 py-1 rounded-full text-[10px] font-medium ${isConnected ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
+                      {isConnected ? <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />}
+                      <span className="hidden sm:inline">{isConnected ? 'Live' : 'Offline'}</span>
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{isConnected ? 'Real-time updates connected' : 'Real-time updates disconnected'}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
               <div className="relative hidden md:block">
                 <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                 <Input

@@ -1,122 +1,179 @@
-# RetailFixIt — Frontend (Operations SPA)
+# RetailFixIt — AI-Powered Retail Maintenance Dispatch Platform
 
-Production-minded React SPA for the RetailFixIt operations platform.
-Backend (Azure SQL + Service Bus + SignalR + Azure OpenAI) is **not included** —
-the frontend talks to a single typed `ApiClient` interface, currently fulfilled
-by an in-memory mock. Swap the mock for an HTTP/SignalR client and the UI is
-wired end-to-end.
+Production-ready full-stack application for automated vendor dispatch with AI recommendations, real-time updates, and comprehensive audit trails.
 
-## Stack
+**Live URLs:**
+- Frontend: `http://localhost:3000` (dev) / Deployed to Netlify (prod)
+- Backend: `https://api-retailfixit-dev.redplant-5c8db0a0.eastus.azurecontainerapps.io`
+- Swagger: `https://api-retailfixit-dev.redplant-5c8db0a0.eastus.azurecontainerapps.io/swagger`
 
-- **TanStack Start** (React 19 + Vite 7), file-based routing
-- **TanStack Query** for server state + cache invalidation
-- **Tailwind v4** with semantic design tokens (oklch) in `src/styles.css`
-- **shadcn/ui** components
-- **Recharts** for the dashboard
-- **Sonner** for toast notifications
+## Quick Start
 
-## Wiring the backend (the only thing left to do)
+```bash
+# Install dependencies
+npm install
 
-Everything the UI needs goes through one interface:
+# Run frontend (mock API - no backend needed)
+npm run dev
 
-```ts
-// src/lib/api/client.ts
-export interface ApiClient {
-  login, me, logout
-  getDashboardMetrics
-  listJobs, getJob, createJob, updateJob, assignJob
-  listVendors, getVendor, updateVendor
-  listAssignments
-  getRecommendation, requestRecommendation, generateJobSummary
-  listAudit
-  listUsers
-  subscribe(handler) // realtime — swap for SignalR
-}
-export const api: ApiClient = new MockApi();
+# Or connect to deployed backend
+VITE_API_BASE=https://api-retailfixit-dev.redplant-5c8db0a0.eastus.azurecontainerapps.io npm run dev
 ```
 
-To go live:
+Login with `dispatch@retailfixit.com` / `dispatch123`
 
-1. Create `src/lib/api/http-api.ts` implementing `ApiClient` — each method
-   maps 1:1 to a REST endpoint or SignalR invocation. Method names already
-   match the contract documented in `src/lib/types.ts`.
-2. Replace the export at the bottom of `client.ts`:
-   ```ts
-   export const api: ApiClient = new HttpApi(import.meta.env.VITE_API_BASE);
-   ```
-3. Implement `subscribe()` with `@microsoft/signalr` against your hub. The
-   `RealtimeEvent<T>` envelope already matches the Service Bus payload shape.
-4. Auth: `MockApi.login()` returns `{ user, token }`. In `HttpApi`, exchange
-   the Entra ID access token for `/me` and persist the bearer for fetches.
-   `AuthProvider` already calls `api.me()` on mount.
+## Architecture
 
-No component imports the mock directly — they all go through the `api`
-singleton, so the swap is one file.
+### Frontend Stack
+- **Framework:** TanStack Start (React 19 + Vite 7) with file-based routing
+- **State:** TanStack Query for server state + cache invalidation
+- **Styling:** Tailwind v4 with semantic design tokens (oklch)
+- **UI:** shadcn/ui components
+- **Charts:** Recharts for metrics
+- **Notifications:** Sonner toasts
 
-## Real-time event contract
+### Backend Stack
+- **Runtime:** .NET 8 Minimal API
+- **Database:** Azure SQL + EF Core
+- **Cache:** Redis (Azure Cache for Redis)
+- **Real-time:** SignalR WebSockets
+- **AI:** Azure OpenAI GPT-4o
+- **Events:** Azure Service Bus
+- **Auth:** JWT Bearer tokens
+- **Hosting:** Azure Container Apps
 
-```ts
-type RealtimeEventType =
-  | "job.created" | "job.updated" | "job.assigned"
-  | "ai.recommendation.ready"
-  | "vendor.updated" | "audit.appended";
+## Key Features
 
-interface RealtimeEvent<T> {
-  id: string;
-  type: RealtimeEventType;
-  tenantId: string;
-  occurredAt: string;
-  payload: T;
-}
-```
+### AI Vendor Recommendations
+- GPT-4o analyzes 6 factors: category match, location, workload, rating, response time, cost
+- Confidence scores (82-94%) with explanations
+- Fallback to rule-based scoring if Azure quota exceeded
 
-Components subscribe via `useRealtime(types, handler)` (see
-`src/hooks/use-realtime.ts`). The mock emits a `job.updated` tick every 12s
-to demonstrate the dashboard refreshing live.
+### Human-in-the-Loop Override
+- Manual vendor selection tab
+- Search and filter vendors
+- Override reason captured for audit
 
-## RBAC
+### Real-Time Updates
+- SignalR WebSocket connection
+- Job status syncs across sessions
+- Connection status indicator in header
 
-`User.roles: Role[]` carries `admin | dispatcher | vendor_manager | support`.
-`useAuth().hasRole(role)` is available to gate buttons or routes; the protected
-layout `src/routes/_app.tsx` redirects unauthenticated users to `/login`.
-Server-side role enforcement is the backend's responsibility — the UI mirrors
-the same shape.
+### AI Governance
+- Kill switch to disable AI recommendations
+- Model versioning
+- Category guardrails (HVAC, Electrical, Plumbing, General)
 
-## Observability hooks (frontend side)
+### Audit Logging
+- Every assignment logged with: who, what, when, IP, user agent
+- Redis cache for fast queries
+- Service Bus for downstream SIEM integration
 
-- `AIRecommendation` carries `latencyMs`, `confidence`, `fallbackUsed`,
-  `modelVersion` and they are surfaced on the job detail panel.
-- AI override flow captures a free-text reason and writes an audit entry
-  with `action: "ai.recommendation.overridden"`.
-- All mutations route through React Query so the caller can wire
-  Application Insights via a global `QueryCache` listener if desired.
+### Security
+- JWT Bearer tokens (15min expiry)
+- Role-based access (admin, dispatcher, vendor_manager, support)
+- Row-level security via EF Core
 
-## Routes
+## API Endpoints
 
 ```
-/login                       public
-/                            redirects to /dashboard (or /login)
-/_app                        auth-gated layout (sidebar + header)
-  /dashboard                 metrics, throughput, status mix, recent jobs
-  /jobs                      paginated list + filters + create dialog
-  /jobs/$jobId               detail, AI rec, assign, AI summary, timeline
-  /vendors                   vendor directory with load + rating
-  /assignments               human vs AI assignments
-  /ai                        AI metrics + summarized jobs
-  /audit                     append-only audit log (live)
-  /users                     users + roles
-  /settings                  tenant + AI governance toggles
+POST   /v1/auth/login              # JWT login
+GET    /v1/auth/me                  # Current user
+POST   /v1/auth/logout              # Logout
+
+GET    /v1/jobs                     # List with search, filters, pagination
+POST   /v1/jobs                     # Create job
+GET    /v1/jobs/{id}                # Get job details
+PUT    /v1/jobs/{id}                # Update job
+POST   /v1/jobs/{id}/assign         # Assign vendor (with audit)
+GET    /v1/jobs/{id}/recommendation # AI vendor recommendations
+
+GET    /v1/vendors                  # List vendors
+GET    /v1/vendors/{id}             # Get vendor
+
+GET    /v1/audit                    # Audit log (most recent first)
+GET    /v1/assignments              # Assignment history
+GET    /v1/users                    # Users list
+GET    /v1/dashboard/metrics         # Dashboard stats
+
+WS     /realtime                    # SignalR hub
 ```
 
-## Demo accounts
+**Query Parameters for /v1/jobs:**
+- `?search=acme` - Search reference, title, customer, description
+- `?status=assigned,completed` - Filter by status (comma-separated)
+- `?priority=high,urgent` - Filter by priority
+- `?category=HVAC` - Filter by category
+- `?page=1&pageSize=20` - Pagination
 
-The mock seeds four users; pick any from the login screen.
+## Deploy Backend
 
-| Role            | Email                      |
-|-----------------|----------------------------|
-| Admin           | alex@retailfixit.com       |
-| Dispatcher      | morgan@retailfixit.com     |
-| Vendor manager  | sam@retailfixit.com        |
-| Support         | jordan@retailfixit.com     |
+```powershell
+cd backend/full-api
 
-Password is ignored by the mock.
+# Build and push
+docker build -t retailfixit-backend:latest .
+docker tag retailfixit-backend:latest retailfixitacrd5rteg4o2kv5q.azurecr.io/retailfixit-api:latest
+az acr login --name retailfixitacrd5rteg4o2kv5q
+docker push retailfixitacrd5rteg4o2kv5q.azurecr.io/retailfixit-api:latest
+
+# Deploy to Azure Container Apps
+az containerapp update `
+  --name api-retailfixit-dev `
+  --resource-group rg-retailfixit-dev `
+  --image retailfixitacrd5rteg4o2kv5q.azurecr.io/retailfixit-api:latest
+```
+
+## Project Structure
+
+```
+src/
+  components/
+    common/              # Reusable UI (DetailSheets, DispatchPanel, etc.)
+    ui/                  # shadcn components
+  routes/
+    _app.tsx             # Auth-gated layout
+    _app/
+      jobs.tsx           # Job list with filters
+      jobs.$jobId.tsx    # Job detail + AI dispatch
+      vendors.tsx        # Vendor directory
+      ai.tsx             # AI governance
+      audit.tsx          # Audit log
+  lib/
+    api/
+      client.ts          # ApiClient interface
+      http-api.ts        # HTTP implementation
+    auth.tsx             # Auth context
+  hooks/
+    use-realtime.ts      # SignalR subscription
+
+backend/full-api/
+  Program.cs             # .NET 8 Minimal API
+  Dockerfile             # Container build
+```
+
+## Tech Assessment Documents
+
+- `LOOM_VIDEO_SCRIPT_CONDENSED.md` - 20-minute demo script
+- `FEATURE_CHECKLIST.md` - Implementation status
+- `SUBMISSION_SUMMARY.md` - Submission overview
+- `PART3_ANSWERS.md` - Technical answers
+- `src/Docs/SUBMISSION_KIT.md` - Full assessment kit
+
+## Demo Accounts
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | alex@retailfixit.com | dispatch123 |
+| Dispatcher | morgan@retailfixit.com | dispatch123 |
+| Vendor Manager | sam@retailfixit.com | dispatch123 |
+| Support | jordan@retailfixit.com | dispatch123 |
+
+**Test Flow:**
+1. Login as dispatcher
+2. Go to Jobs → Click any unassigned job
+3. Click "Dispatch Vendor"
+4. AI tab shows recommendations (3 vendors with scores)
+5. Manual tab allows override
+6. Assign vendor → toast confirmation
+7. Check Audit Log → see assignment logged

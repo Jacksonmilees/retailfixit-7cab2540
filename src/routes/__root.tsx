@@ -10,6 +10,7 @@ import {
 
 import appCss from "../styles.css?url";
 import { AuthProvider } from "@/lib/auth/context";
+import { SignalRProvider } from "@/lib/realtime/SignalRProvider";
 
 function NotFoundComponent() {
   return (
@@ -115,7 +116,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Outlet />
+        <SignalRProvider>
+          <Outlet />
+        </SignalRProvider>
       </AuthProvider>
     </QueryClientProvider>
   );
