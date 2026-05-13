@@ -53,7 +53,9 @@ export interface ApiClient {
   subscribe(handler: (e: RealtimeEvent) => void): () => void;
 }
 
-import { MockApi } from "./mock-api";
+import { HttpApi } from "./http-api";
 
-// Single shared instance. Replace with `new HttpApi(...)` to point at Azure.
-export const api: ApiClient = new MockApi();
+// Connected to Azure Container App
+export const api: ApiClient = new HttpApi({
+  baseUrl: "https://api-retailfixit-dev.redplant-5c8db0a0.eastus.azurecontainerapps.io/v1"
+});

@@ -63,7 +63,7 @@ function VendorDetail() {
               <div className="flex flex-wrap items-center gap-3 text-[12px] text-muted-foreground mt-1">
                 <span className="inline-flex items-center gap-1"><Mail className="h-3 w-3" />{vendor.email}</span>
                 <span className="inline-flex items-center gap-1"><Phone className="h-3 w-3" />{vendor.phone}</span>
-                <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{vendor.regions.join(", ")}</span>
+                <span className="inline-flex items-center gap-1"><MapPin className="h-3 w-3" />{typeof vendor.regions === 'string' ? vendor.regions : vendor.regions?.join(', ') ?? '—'}</span>
               </div>
             </div>
             <div className="hidden sm:flex flex-col items-end pb-1">
@@ -112,11 +112,11 @@ function VendorDetail() {
           <CardContent className="space-y-3">
             <div>
               <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">Categories</div>
-              <div className="flex flex-wrap gap-1.5">{vendor.categories.map((c) => <Badge key={c} variant="secondary" className="text-[11px]">{c}</Badge>)}</div>
+              <div className="flex flex-wrap gap-1.5">{(typeof vendor.categories === 'string' ? vendor.categories.split(',').filter(Boolean) : vendor.categories || []).map((c) => <Badge key={c} variant="secondary" className="text-[11px]">{c.trim()}</Badge>)}</div>
             </div>
             <div>
               <div className="text-[11px] uppercase tracking-wider text-muted-foreground mb-2">Regions</div>
-              <div className="flex flex-wrap gap-1.5">{vendor.regions.map((r) => <Badge key={r} variant="outline" className="text-[11px]">{r}</Badge>)}</div>
+              <div className="flex flex-wrap gap-1.5">{(typeof vendor.regions === 'string' ? vendor.regions.split(',').filter(Boolean) : vendor.regions || []).map((r) => <Badge key={r} variant="outline" className="text-[11px]">{r.trim()}</Badge>)}</div>
             </div>
           </CardContent>
         </Card>

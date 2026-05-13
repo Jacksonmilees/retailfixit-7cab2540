@@ -15,6 +15,7 @@ import {
   Mail,
   MapPin,
   Phone,
+  Send,
   Sparkles,
   User,
   Wrench,
@@ -89,10 +90,10 @@ export function JobDetailSheet({
           <section className="grid gap-3 sm:grid-cols-2">
             <Info icon={Building2} label="Customer" value={job.customerName} />
             <Info icon={Phone} label="Customer phone" value={job.customerPhone ?? "—"} />
-            <Info icon={MapPin} label="Full location" value={`${job.address}, ${job.city}, ${job.region}`} />
+            <Info icon={MapPin} label="Full location" value={job.address ? `${job.address}, ${job.city || ''}, ${job.region || ''}` : "—"} />
             <Info icon={Wrench} label="Service category" value={job.category} />
-            <Info icon={Clock} label="SLA due" value={formatDateTime(job.slaDueAt)} />
-            <Info icon={FileText} label="Estimated value" value={`$${job.estimatedValue.toLocaleString()}`} />
+            <Info icon={Clock} label="SLA due" value={job.slaDueAt ? formatDateTime(job.slaDueAt) : "—"} />
+            <Info icon={FileText} label="Estimated value" value={job.estimatedValue ? `$${job.estimatedValue.toLocaleString()}` : "—"} />
             <Info icon={Clock} label="Created" value={formatDateTime(job.createdAt)} />
             <Info icon={Clock} label="Updated" value={formatDateTime(job.updatedAt)} />
           </section>
@@ -120,8 +121,16 @@ export function JobDetailSheet({
                 <Metric label="Notes" value={assignment.notes ?? "No notes"} />
               </div>
             ) : (
-              <div className="rounded-xl bg-bg-secondary p-3 text-[12px] text-muted-foreground">
-                No vendor has accepted or been assigned to this job yet.
+              <div className="space-y-3">
+                <div className="rounded-xl bg-bg-secondary p-3 text-[12px] text-muted-foreground">
+                  No vendor has accepted or been assigned to this job yet.
+                </div>
+                <Link to="/jobs/$jobId" params={{ jobId: job.id }}>
+                  <Button size="default" className="w-full rounded-lg shadow-pop bg-primary hover:bg-primary/90">
+                    <Send className="h-4 w-4 mr-2" />
+                    Dispatch Vendor
+                  </Button>
+                </Link>
               </div>
             )}
           </section>
@@ -187,21 +196,21 @@ export function VendorDetailSheet({
           <section className="grid gap-3 sm:grid-cols-2">
             <Info icon={Mail} label="Email" value={vendor.email} />
             <Info icon={Phone} label="Phone" value={vendor.phone} />
-            <Info icon={MapPin} label="Regions" value={vendor.regions.join(", ")} />
+            <Info icon={MapPin} label="Regions" value={typeof vendor.regions === 'string' ? vendor.regions : vendor.regions?.join(', ') ?? '—'} />
             <Info icon={Activity} label="Last active" value={formatDateTime(vendor.lastActiveAt)} />
           </section>
 
           <section className="rounded-2xl border border-border/60 bg-card p-4 shadow-card">
             <div className="text-[13px] font-semibold">Capabilities</div>
             <div className="mt-3 flex flex-wrap gap-1.5">
-              {vendor.categories.map((category) => (
-                <Badge key={category} variant="secondary" className="text-[10px]">
-                  {category}
+              {(typeof (vendor as any).categories === 'string' ? (vendor as any).categories.split(',').filter(Boolean) : (vendor as any).categories || []).map((category: string, idx: number) => (
+                <Badge key={`cat-${idx}-${category}`} variant="secondary" className="text-[10px]">
+                  {category.trim()}
                 </Badge>
               ))}
-              {vendor.regions.map((region) => (
-                <Badge key={region} variant="outline" className="text-[10px]">
-                  {region}
+              {(typeof (vendor as any).regions === 'string' ? (vendor as any).regions.split(',').filter(Boolean) : (vendor as any).regions || []).map((region: string, idx: number) => (
+                <Badge key={`reg-${idx}-${region}`} variant="outline" className="text-[10px]">
+                  {region.trim()}
                 </Badge>
               ))}
             </div>
@@ -336,7 +345,7 @@ export function VendorSummaryCard({ vendor, assignment }: { vendor: Vendor; assi
       <div className="grid gap-2 sm:grid-cols-2">
         <Info icon={Phone} label="Phone" value={vendor.phone} />
         <Info icon={Mail} label="Email" value={vendor.email} />
-        <Info icon={MapPin} label="Regions" value={vendor.regions.join(", ")} />
+        <Info icon={MapPin} label="Regions" value={typeof (vendor as any).regions === 'string' ? (vendor as any).regions : (vendor as any).regions?.join(', ') ?? '—'} />
         <Info icon={CheckCircle2} label="Completed jobs" value={vendor.completedJobs.toLocaleString()} />
       </div>
       {assignment && (

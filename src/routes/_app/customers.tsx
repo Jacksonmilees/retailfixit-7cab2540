@@ -82,8 +82,8 @@ function CustomersPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filtered.slice(0, 100).map((c) => (
-                  <TableRow key={c.name} className="cursor-pointer" onClick={() => setSelectedCustomerName(c.name)}>
+                {filtered.slice(0, 100).map((c, index) => (
+                  <TableRow key={`${c.name}-${index}`} className="cursor-pointer" onClick={() => setSelectedCustomerName(c.name)}>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <div className="h-9 w-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center"><Building2 className="h-4 w-4" /></div>
@@ -95,8 +95,8 @@ function CustomersPage() {
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-wrap gap-1">
-                        {c.cities.slice(0, 3).map((city) => (
-                          <Badge key={city} variant="outline" className="text-[10px]"><MapPin className="h-2.5 w-2.5 mr-1" />{city}</Badge>
+                        {c.cities.slice(0, 3).map((city, cityIndex) => (
+                          <Badge key={`${city}-${cityIndex}`} variant="outline" className="text-[10px]"><MapPin className="h-2.5 w-2.5 mr-1" />{city}</Badge>
                         ))}
                         {c.cities.length > 3 && <Badge variant="outline" className="text-[10px]">+{c.cities.length - 3}</Badge>}
                       </div>

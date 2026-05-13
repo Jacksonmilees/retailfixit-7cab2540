@@ -63,8 +63,8 @@ function VendorsList() {
                     <button type="button" className="font-medium text-foreground transition-colors hover:text-primary" onClick={(e) => { e.stopPropagation(); setSelectedVendorId(v.id); }}>{v.name}</button>
                     <div className="text-xs text-muted-foreground">{v.email}</div>
                   </TableCell>
-                  <TableCell><div className="flex flex-wrap gap-1">{v.categories.map((c) => <Badge key={c} variant="secondary" className="text-[10px]">{c}</Badge>)}</div></TableCell>
-                  <TableCell className="text-muted-foreground text-xs">{v.regions.join(", ")}</TableCell>
+                  <TableCell><div className="flex flex-wrap gap-1">{(typeof v.categories === 'string' ? v.categories.split(',').filter(Boolean) : v.categories || []).map((c) => <Badge key={c} variant="secondary" className="text-[10px]">{c.trim()}</Badge>)}</div></TableCell>
+                  <TableCell className="text-muted-foreground text-xs">{typeof v.regions === 'string' ? v.regions : (v.regions || []).join(', ')}</TableCell>
                   <TableCell className="text-right tabular-nums"><span className="inline-flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-warning text-warning" />{v.rating}</span></TableCell>
                   <TableCell className="text-right tabular-nums">{v.activeJobs}/{v.capacity}</TableCell>
                   <TableCell className="text-right tabular-nums text-muted-foreground">{v.avgResponseMinutes}m</TableCell>

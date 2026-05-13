@@ -129,9 +129,9 @@ function JobDetail() {
             qc={qc}
             jobId={jobId}
           >
-            <Button size="sm" className="rounded-lg shadow-pop">
-              <Send className="h-3.5 w-3.5 mr-1.5" />
-              {assigned ? "Reassign vendor" : "Dispatch vendor"}
+            <Button size="default" className={`rounded-lg shadow-pop ${assigned ? "bg-warning hover:bg-warning/90" : "bg-primary"}`}>
+              <Send className="h-4 w-4 mr-2" />
+              {assigned ? "Reassign Vendor" : "Dispatch Vendor"}
             </Button>
           </DispatchSheet>
         </div>
@@ -195,9 +195,9 @@ function JobDetail() {
                 qc={qc}
                 jobId={jobId}
               >
-                <Button size="sm" className="rounded-lg h-8">
-                  <Send className="h-3.5 w-3.5 mr-1.5" />
-                  {assigned ? "Reassign" : "Dispatch"}
+                <Button size="default" className={`rounded-lg shadow-pop ${assigned ? "bg-warning hover:bg-warning/90" : "bg-primary"}`}>
+                  <Send className="h-4 w-4 mr-2" />
+                  {assigned ? "Reassign Vendor" : "Dispatch Vendor"}
                 </Button>
               </DispatchSheet>
             </div>
@@ -381,9 +381,9 @@ function JobDetail() {
           qc={qc}
           jobId={jobId}
         >
-          <Button size="sm" className="rounded-lg flex-[2] shadow-pop">
-            <Send className="h-3.5 w-3.5 mr-1.5" />
-            {assigned ? "Reassign vendor" : "Dispatch vendor"}
+          <Button size="default" className={`rounded-lg flex-[2] shadow-pop ${assigned ? "bg-warning hover:bg-warning/90" : "bg-primary"}`}>
+            <Send className="h-4 w-4 mr-2" />
+            {assigned ? "Reassign Vendor" : "Dispatch Vendor"}
           </Button>
         </DispatchSheet>
       </div>
@@ -564,9 +564,9 @@ function VendorPopover({ vendor, children }: { vendor: Vendor; children: React.R
               Categories
             </div>
             <div className="flex flex-wrap gap-1">
-              {vendor.categories.map((c) => (
+              {(typeof (vendor as any).categories === 'string' ? (vendor as any).categories.split(',').filter(Boolean) : (vendor as any).categories || []).map((c: string) => (
                 <Badge key={c} variant="secondary" className="text-[10px]">
-                  {c}
+                  {c.trim()}
                 </Badge>
               ))}
             </div>
@@ -729,7 +729,9 @@ function DispatchSheet({
     (v) =>
       !search ||
       v.name.toLowerCase().includes(search.toLowerCase()) ||
-      v.categories.some((c) => c.toLowerCase().includes(search.toLowerCase())),
+      (typeof (v as any).categories === 'string' 
+        ? (v as any).categories.toLowerCase().includes(search.toLowerCase())
+        : (v as any).categories?.some((c: string) => c.toLowerCase().includes(search.toLowerCase()))),
   );
 
   return (
@@ -758,7 +760,18 @@ function DispatchSheet({
           </TabsList>
 
           <TabsContent value="ai" className="flex-1 overflow-y-auto px-5 py-4 space-y-3 mt-0">
-            {rec ? (
+            {(rec as any)?.killSwitchEnabled ? (
+              <div className="rounded-xl border border-warning/40 bg-warning/5 p-5 text-center">
+                <AlertCircle className="h-6 w-6 text-warning mx-auto mb-2" />
+                <div className="text-[14px] font-semibold text-warning">AI Disabled</div>
+                <div className="text-[12px] text-muted-foreground mt-1">
+                  The AI kill switch is ON. AI recommendations are blocked.
+                </div>
+                <div className="text-[11px] text-muted-foreground mt-2">
+                  Switch to "Manual" tab to dispatch vendors manually.
+                </div>
+              </div>
+            ) : rec?.candidates?.length ? (
               <>
                 <div className="flex items-center justify-between text-[11px] text-muted-foreground">
                   <span className="flex items-center gap-1.5">
@@ -858,7 +871,9 @@ function DispatchSheet({
                       <div className="text-[13px] font-medium truncate">{v.name}</div>
                       <div className="text-[10px] text-muted-foreground truncate">
                         ★ {v.rating} · {v.activeJobs}/{v.capacity} ·{" "}
-                        {v.categories.slice(0, 2).join(", ")}
+                        {typeof (v as any).categories === 'string' 
+                          ? (v as any).categories.split(',')[0] 
+                          : (v as any).categories?.slice(0, 2).join(", ") ?? 'General'}
                       </div>
                     </div>
                   </div>

@@ -29,3 +29,6 @@ dist-ssr
 *.ntvs*
 *.njsproj
 *.sw?
+
+# Local Netlify folder
+.netlify

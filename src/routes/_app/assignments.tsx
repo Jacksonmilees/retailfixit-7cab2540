@@ -424,7 +424,7 @@ function AssignmentDetailSheet({
               <div className="grid gap-2 sm:grid-cols-2">
                 <Info icon={Phone} label="Phone" value={vendor.phone} />
                 <Info icon={UserIcon} label="Email" value={vendor.email} />
-                <Info icon={MapPin} label="Regions" value={vendor.regions.join(", ")} />
+                <Info icon={MapPin} label="Regions" value={Array.isArray(vendor.regions) ? vendor.regions.join(", ") : vendor.regions} />
                 <Info
                   icon={CheckCircle2}
                   label="Completed jobs"
@@ -432,7 +432,7 @@ function AssignmentDetailSheet({
                 />
               </div>
               <div className="mt-3 flex flex-wrap gap-1.5">
-                {vendor.categories.map((category) => (
+                {(Array.isArray(vendor.categories) ? vendor.categories : vendor.categories?.split(",").map(c => c.trim()) || []).map((category) => (
                   <Badge key={category} variant="secondary" className="text-[10px]">
                     {category}
                   </Badge>

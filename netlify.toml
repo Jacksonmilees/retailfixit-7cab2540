@@ -1,0 +1,20 @@
+[build]
+  command = "npm run build"
+  publish = "dist"
+  functions = "dist/server"
+
+[build.environment]
+  NODE_VERSION = "20"
+
+[[redirects]]
+  from = "/api/*"
+  to = "https://api-retailfixit-dev.redplant-5c8db0a0.eastus.azurecontainerapps.io/v1/:splat"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[context.production.environment]
+  VITE_API_URL = "https://api-retailfixit-dev.redplant-5c8db0a0.eastus.azurecontainerapps.io"

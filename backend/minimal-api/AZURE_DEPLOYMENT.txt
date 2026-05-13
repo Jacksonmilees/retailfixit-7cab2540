@@ -1,0 +1,29 @@
+﻿========================================
+  RETAILFIXIT API DEPLOYED TO AZURE
+========================================
+
+API URL: https://api-retailfixit-dev.redplant-5c8db0a0.eastus.azurecontainerapps.io
+
+Endpoints:
+- Health:    https://api-retailfixit-dev.redplant-5c8db0a0.eastus.azurecontainerapps.io/healthz
+- API Root:  https://api-retailfixit-dev.redplant-5c8db0a0.eastus.azurecontainerapps.io/
+- Jobs:      https://api-retailfixit-dev.redplant-5c8db0a0.eastus.azurecontainerapps.io/v1/jobs
+- Vendors:   https://api-retailfixit-dev.redplant-5c8db0a0.eastus.azurecontainerapps.io/v1/vendors
+- Dashboard: https://api-retailfixit-dev.redplant-5c8db0a0.eastus.azurecontainerapps.io/v1/dashboard/metrics
+- Swagger:   https://api-retailfixit-dev.redplant-5c8db0a0.eastus.azurecontainerapps.io/swagger
+
+Azure Resources:
+- Resource Group: rg-retailfixit-dev
+- Container App:  api-retailfixit-dev
+- Container Registry: retailfixitacrd5rteg4o2kv5q.azurecr.io
+
+Monthly Cost: ~-12 (Free tier friendly)
+
+Next Steps:
+1. Connect frontend at src/lib/api/client.ts
+2. Update baseUrl to: https://api-retailfixit-dev.redplant-5c8db0a0.eastus.azurecontainerapps.io/v1
+
+Commands:
+- View logs: az containerapp logs show --name api-retailfixit-dev --resource-group rg-retailfixit-dev
+- Restart:   az containerapp revision restart --name api-retailfixit-dev --resource-group rg-retailfixit-dev
+- Delete:    az group delete --name rg-retailfixit-dev --yes

@@ -1,0 +1,37 @@
+﻿========================================
+  RETAILFIXIT FULL BACKEND DEPLOYED
+========================================
+
+API URL: https://api-retailfixit-dev.redplant-5c8db0a0.eastus.azurecontainerapps.io
+
+Working Endpoints:
+- GET  /healthz                          -> Healthy
+- GET  /v1/dashboard/metrics             -> Live SQL data
+- GET  /v1/jobs                          -> List jobs (paginated)
+- POST /v1/jobs                          -> Create job
+- GET  /v1/jobs/{id}                     -> Get job
+- PATCH /v1/jobs/{id}                    -> Update job
+- POST /v1/jobs/{id}/recommendation     -> AI recommendation
+- GET  /v1/vendors                       -> List vendors
+- POST /v1/auth/login                    -> JWT auth
+- POST /v1/ai/summary                    -> OpenAI summary
+
+Azure Resources:
+- SQL Server: sql-retailfixit-cus.database.windows.net
+- Redis: redis-retailfixit-dev-d5rteg4o2kv5q.redis.cache.windows.net
+- Cosmos: cosmos-retailfixit-dev-d5rteg4o2kv5q
+- OpenAI: openai-retailfixit-dev-8a92b.openai.azure.com
+- Container App: api-retailfixit-dev
+
+Monthly Cost: ~-50/month
+
+To deploy OpenAI model:
+az cognitiveservices account deployment create \
+  --name openai-retailfixit-dev \
+  --resource-group rg-retailfixit-dev \
+  --deployment-name gpt-4o \
+  --model-name gpt-4o \
+  --model-version "2024-05-13" \
+  --model-format OpenAI \
+  --sku Standard \
+  --sku-capacity 1
