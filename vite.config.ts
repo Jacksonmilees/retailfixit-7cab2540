@@ -14,7 +14,7 @@ export default defineConfig({
   },
   vite: {
     build: {
-      outDir: ".output/public",
+      outDir: "dist",
       emptyOutDir: true,
     },
   },
