@@ -3,7 +3,7 @@
 Azure-native, AI-assisted operations platform that coordinates service jobs between customers and ~1,000 vendors. Production-ready full-stack application with automated vendor dispatch, real-time updates, and comprehensive audit trails.
 
 **Live URLs:**
-- Frontend: `https://retailfixit-7cab2540.vercel.app` (Vercel)
+- Frontend: `https://retailfixit.retailfixit.workers.dev` (Cloudflare Workers)
 - Backend: `https://api-retailfixit-dev.redplant-5c8db0a0.eastus.azurecontainerapps.io`
 - Swagger: `https://api-retailfixit-dev.redplant-5c8db0a0.eastus.azurecontainerapps.io/swagger`
 
